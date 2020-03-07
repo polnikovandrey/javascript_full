@@ -1,0 +1,15 @@
+version: "3.7"
+services:
+  nodejs:
+    image: node
+    volumes:
+      - ./nodejs:/var/lib/nodejs
+    working_dir: /var/lib/nodejs
+    networks:
+      - docker_xxx
+    ports:
+      - "3000:3000"
+      - "8787:8787"
+networks:
+  docker_xxx:
+    driver: bridge

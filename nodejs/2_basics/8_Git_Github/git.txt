@@ -1,0 +1,19 @@
+git init
+git config --global user.name "Andrey"
+git config --local user.name "Andrey"
+git config --global user.email "polnikov.andrey@gmail.com"
+git config --local user.email "polnikov.andrey@gmail.com"
+git status
+git add -A      // -A means all untracked files
+git add file.ext
+git add *.css
+git commit -a -m"Commit name"
+git checkout
+git log
+git remote add origin https://github.com/user/project.git
+git push -u origin/master       // -u means setting the default branch to push. -u is used for first push.
+git push
+
+https://githowto.com/ru
+https://git-scm.com/book/ru/v2
+https://learngitbranching.js.org/

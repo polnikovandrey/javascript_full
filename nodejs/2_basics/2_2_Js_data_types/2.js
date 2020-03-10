@@ -1,3 +1,5 @@
+'use strict';   // jshint ignore:line
+
 // see 2.html
 
 /* ----- There are 6 basic data types in js. ----- */

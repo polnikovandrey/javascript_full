@@ -13,6 +13,8 @@ git log
 git remote add origin https://github.com/user/project.git
 git push -u origin/master       // -u means setting the default branch to push. -u is used for first push.
 git push
+git pull
+git clone https://... targetDir
 
 https://githowto.com/ru
 https://git-scm.com/book/ru/v2

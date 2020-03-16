@@ -12,10 +12,6 @@ let appData = {
     savings: false
 };
 
-function promptUserExpenses() {
-
-}
-
 for (let i = 0; i < 2; i++) {
     let expenseInput = prompt('Введите обязательную статью расходов'),
         expenseSum = prompt('Во сколько обойдется?');

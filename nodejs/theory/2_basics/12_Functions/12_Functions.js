@@ -72,6 +72,3 @@ console.log(Math.round(num));               // Output: 12
 let px = '12.2px';
 console.log(parseInt(px));                  // Output: 12
 console.log(parseFloat(px));                // Output: 12.2
-
-
-

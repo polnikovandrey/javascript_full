@@ -41,4 +41,3 @@ console.log('2' === 2);     // Output: false
 console.log(true || false);         // Output: true
 console.log(true && !false);         // Output: true
 console.log(true && false);         // Output: false
-

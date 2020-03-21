@@ -8,7 +8,7 @@ var string = 'Hello!';          // String
 var symbol = Symbol();          // Symbol, rarely used.
 var boolean = true;             // boolean - true/false.
 var aNull = null;
-var anUndefined = undefined;
+var anUndefined = undefined;    // jshint ignore: line
 
 /* ----- There are 6 object data types. ----- */
 var object = {};    // Simple object.

@@ -11,7 +11,7 @@ function start() {
 }
 start();
 
-let appData = {
+const appData = {
     budget: money,
     timeData: time,
     expenses: {},
@@ -22,7 +22,7 @@ let appData = {
 
 function chooseExpenses() {
     for (let i = 0; i < 2; i++) {
-        let expenseInput = prompt('Введите обязательную статью расходов'),
+        const expenseInput = prompt('Введите обязательную статью расходов'),
             expenseSum = prompt('Во сколько обойдется?');
         if (typeof(expenseInput) === 'string'
             && typeof(expenseInput) != null
@@ -39,7 +39,7 @@ function chooseExpenses() {
 chooseExpenses();
 
 function detectDayBudget() {
-    let monthExpensesPerDay = (appData.budget / 30).toFixed();
+    const monthExpensesPerDay = (appData.budget / 30).toFixed();
     appData.moneyPerDay = monthExpensesPerDay;
     alert('Daily budget = ' + monthExpensesPerDay);
 }
@@ -60,7 +60,7 @@ detectLevel();
 
 function checkSavings() {
     if (appData.savings === true) {
-        let save = +prompt('Какова сумма накопления?'),
+        const save = +prompt('Какова сумма накопления?'),
             percent = +prompt('Под какой процент?');
         appData.monthIncome = save / 100 / 12 * percent;
         alert('Доход в месяц с вашего депозита: ' + appData.monthIncome);
@@ -70,8 +70,8 @@ checkSavings();
 
 function chooseOptExpenses() {
     for (let i = 0; i < 3; i++) {
-        let optExpence = prompt('Статья необязательных расходов?');
-        appData.optionalExpenses[i + 1] = optExpence;
+        const optExpense = prompt('Статья необязательных расходов?');
+        appData.optionalExpenses[i + 1] = optExpense;
     }
     console.log(appData.optionalExpenses);
 }

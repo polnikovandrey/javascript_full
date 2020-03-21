@@ -1,9 +1,9 @@
 'use strict';   // jshint ignore: line
 
-let money = +prompt('Ваш бюджет на месяц?');
-let time = prompt('Введите дату в формате YYYY-MM-DD');
+const money = +prompt('Ваш бюджет на месяц?');
+const time = prompt('Введите дату в формате YYYY-MM-DD');
 
-let appData = {
+const appData = {
     budget: money,
     timeData: time,
     expenses: {},
@@ -13,7 +13,7 @@ let appData = {
 };
 
 for (let i = 0; i < 2; i++) {
-    let expenseInput = prompt('Введите обязательную статью расходов'),
+    const expenseInput = prompt('Введите обязательную статью расходов'),
         expenseSum = prompt('Во сколько обойдется?');
     if (typeof(expenseInput) === 'string'                       // In fact expenseInput is always a string, typeof check is excess.
             && typeof(expenseInput) != null
@@ -32,7 +32,7 @@ for (let i = 0; i < 2; i++) {
 /*
 let i = 0;
 while (i < 2) {
-    let expenseInput = prompt('Введите обязательную статью расходов'),
+    const expenseInput = prompt('Введите обязательную статью расходов'),
         expenseSum = prompt('Во сколько обойдется?');
     if (typeof(expenseInput) === 'string'                       // In fact expenseInput is always a string, typeof check is excess.
         && typeof(expenseInput) != null
@@ -51,7 +51,7 @@ while (i < 2) {
 /*
 let i = 0;
 do {
-    let expenseInput = prompt('Введите обязательную статью расходов'),
+    const expenseInput = prompt('Введите обязательную статью расходов'),
         expenseSum = prompt('Во сколько обойдется?');
     if (typeof(expenseInput) === 'string'                       // In fact expenseInput is always a string, typeof check is excess.
         && typeof(expenseInput) != null
@@ -68,7 +68,7 @@ do {
 */
 
 
-let monthExpensesPerDay = appData.budget / 30;
+const monthExpensesPerDay = appData.budget / 30;
 appData.moneyPerDay = monthExpensesPerDay;
 alert('Daily budget = ' + monthExpensesPerDay);
 

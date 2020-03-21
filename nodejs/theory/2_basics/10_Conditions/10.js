@@ -14,7 +14,7 @@ if (1) {    // Always true
 
 (true) ? console.log(true) : console.log(false);
 
-let aNumber = 1;
+const aNumber = 1;
 switch (aNumber) {
     case 1:
         break;
@@ -25,4 +25,3 @@ switch (aNumber) {
     default:
         break;
 }
-

@@ -27,8 +27,18 @@ console.log(Number('   123   ')); // Output: 123
 console.log(Number(''));          // Output: 0
 console.log(Number('123px'));     // Output: NaN
 
-console.log('1' + 2);                   // Output: 12
+console.log('1' + 2);                   // Output: 12           // If at least one operand is a string - the rest operands are also converted to strings.
 console.log(1 + '2');                   // Output: 12
+console.log(1 + 2 + '3');               // Output: 33           // Numbers to the left of a string operand are first applied, the result is concatenated with a string operand.
+console.log('2' - 1);                   // Output: 2            // Only + converts values to strings. Other operators on the contrary cast operands to numbers.
+console.log('6' / '2');                 // Output: 3
+
+let x = 1;
+console.log(+x);                        // Output:1             // +numberInsideNaN is same as Number(numberInsideNaN). There is no influence on numbers.
+let y = -2;
+console.log(+y);                        // Output: -2
+console.log(+true);                     // Output: 1            // Boolean argument is converted to a number 1.
+console.log(+'');                       // Output: 0            // Empty string argument is converted to a number 0.
 
 
 /* ----- Logical cast (booleans) ----- */

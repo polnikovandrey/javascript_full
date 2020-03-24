@@ -64,8 +64,54 @@ console.log(null <= 0);             // Output: true     Comparison operator cast
 
 // &&, || and ! negate operator
 console.log(true || false);         // Output: true
-console.log(true && !false);         // Output: true
+console.log(true && !false);        // Output: true
 console.log(true && false);         // Output: false
+
+// Negate operator has the greatest weight among logical operators.
+// Negate operator casts operands to booleans and then negates the result.
+console.log(!true);                 // Output: false
+console.log(!0);                    // Output: true
+// Double negate operator could be used to convert a value to boolean. First converts and negates, second - negates again. The better way is to use Boolean(value).
+console.log(!!'non empty string');  // Output: true
+console.log(!!null);                // Output: false
+
+
+// Js behavior with || operator differs from the common boolean logic operator OR:
+// if there are multiple operands used with || - the result returned is the first true operand or the last operand if all operands are false.
+console.log(1 || 0);                    // Output: 1
+console.log(true || 'some string');     // Output: true
+console.log(null || 1);                 // Output: 1
+console.log(null || 0 || 1);            // Output: 1
+console.log(undefined || null || 0);    // Output: 0
+
+// This js specific could be used to find first non-null and non-undefined value.
+const nullValue = null, undefinedValue = undefined, nonNullValue = 'non-null-non-undefined';
+const firstNonNullNonUndefined = nullValue || undefinedValue || nonNullValue;
+console.log(firstNonNullNonUndefined);                                                              // Output: 'non-null-non-undefined'
+
+// Shortcut calculation is another usage of || operator. If an operand results true - the rest operands are ignored.
+let initOrNotInit;
+if (true || (initOrNotInit = 1)) {
+    // some logic
+}
+console.log(initOrNotInit);             // Output: undefined        initOrNotInit was not initialized.
+
+// && operand's result is the first false operand or the last operand if all operands are true.
+console.log(1 && 0);                    // Output: 0
+console.log(1 && 5);                    // Output: 5
+console.log(null && 5);                 // Output: null
+console.log(0 && 'some string');        // Output: 0
+console.log(1 && 2 && null && 3);       // Output: null
+console.log(1 && 2 && 3);               // Output: 3
+
+// && operator weight is greater then || operator. So:      a && b || c && d === (a && b) || (c && d)
+
+// && operator could also be used for shortcut calculations. If operand is false the rest operands are ignored.
+(1 < 0) && console.log('No output');    // No output.
+
+
+
+
 
 
 // ** operator

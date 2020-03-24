@@ -31,7 +31,7 @@ greeting = age < 10 ? 'Hello, child!' : age < 18 ? 'Hello, young man!' : 'Good d
 
 const aNumber = 1;
 switch (aNumber) {
-    case 1:
+    case 1:                 // case check strict equality of a value (aNumber === 1).
         break;
     case aNumber > 1:       // Note the possibility to compare a switch value in js.
         break;

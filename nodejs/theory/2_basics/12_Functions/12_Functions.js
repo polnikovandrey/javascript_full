@@ -7,6 +7,7 @@ let globalVariableToOverride = 'globalVarValue';
 // functionExpression(1, 2);                           // Not valid. ReferenceError: functionExpression is not defined.
 
 function functionDeclaration(argument1, argument2, optionalArgument) {    // Function declaration. Is visible before declaration, could be called before declaration.
+    argument1++;                                        // argument1 is a copy of outer variable parameter1, so it is a function local variable.
     console.log(argument1);                             // Output: firstParameterValue
     console.log(argument2);                             // Output: undefined
     let localVariable = 'someValue';                    // Local means 'inside function'. Local variable is usable only inside function block.
@@ -25,7 +26,8 @@ var functionExpression = function(argument1, argument2) {   // Function expressi
 
 let arrowFunction = (argument1, argument2) => argument1 + argument2;    // Arrow function.
 
-functionDeclaration(1, 2);
+let parameter1 = 1;
+functionDeclaration(parameter1, 2);
 
 
 // console.log(localVariable);                          // Reference error: localVariable is not defined.
@@ -72,3 +74,32 @@ console.log(Math.round(num));               // Output: 12
 let px = '12.2px';
 console.log(parseInt(px));                  // Output: 12
 console.log(parseFloat(px));                // Output: 12.2
+
+
+/* ----- Function parameter default value and undefined value ----- */
+function getDefaultValue() {
+    return 'default';
+}
+// Parameters with default values should come after regular parameters.
+function withDefaultParameterValue(paramWithoutDefalutValue, paramWithDefaultValue = 'default', paramWithDefaultFunctionValue = getDefaultValue()) {
+    console.log(paramWithoutDefalutValue + '/' + paramWithDefaultValue + '/' + paramWithDefaultFunctionValue);
+}
+withDefaultParameterValue();        // Output: undefined/default/default
+
+
+/* ----- Return value of a function ----- */
+// Function without or with empty return results in undefined.
+function withoutReturn() {
+}
+function withEmptyReturn() {
+    return;
+}
+console.log(withoutReturn() === undefined);         // Output: true
+console.log(withEmptyReturn() === undefined);       // Output: true
+
+// Expression of a return statement should start on the return line. Otherwise compiler appends ';' after return, undefined is returned;
+function wrongReturnUsage() {
+    return
+        2 + 2;
+}
+console.log(wrongReturnUsage() === undefined);      // Output: true

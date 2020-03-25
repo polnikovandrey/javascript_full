@@ -1,7 +1,11 @@
 'use strict';       // jshint ignore: line
 
+// 4 types of functions in js: declared function, function expression, anonymous function, arrow function.
+// The common rule is to use function declaration as much as possible - it's visible globally and before declaration, so it's more agile and intuitive method.
+// Other types should be used only if it's more suitable/convenient in a specific case.
+
 let globalVariable = 1;                                 // Global means 'outside function'. Global variable is usable both inside and outside functions.
-let globalVariableToOverride = 'globalVarValue';
+const globalVariableToOverride = 'globalVarValue';
 
 // functionDeclaration(1, 2);                          // Valid call. Declared function is visible before declaration and so could be called before declaration.
 // functionExpression(1, 2);                           // Not valid. ReferenceError: functionExpression is not defined.
@@ -10,19 +14,23 @@ function functionDeclaration(argument1, argument2, optionalArgument) {    // Fun
     argument1++;                                        // argument1 is a copy of outer variable parameter1, so it is a function local variable.
     console.log(argument1);                             // Output: firstParameterValue
     console.log(argument2);                             // Output: undefined
-    let localVariable = 'someValue';                    // Local means 'inside function'. Local variable is usable only inside function block.
+    const localVariable = 'someValue';                    // Local means 'inside function'. Local variable is usable only inside function block.
     globalVariable = 2;
-    let globalVariableToOverride = 'overridenGlobalVarValue';
+    const globalVariableToOverride = 'overridenGlobalVarValue';
     console.log(globalVariableToOverride);              // Output: overridenGlobalVarValue
     if (optionalArgument) {                             // Every argument of a function could be skipped when function is called.
         console.log('There is an optional argument');
     }
     return argument1 + argument2;
 }
+// Function declaration should be declared in the global context (visible everywhere) or in the block of code (visible inside block).
 
-var functionExpression = function(argument1, argument2) {   // Function expression is visible only after the expression (with no difference if var or let is used).
+const functionExpression = function(argument1, argument2) {   // Function expression is visible only after the expression (with no difference if var or let is used).
     return argument1 + argument2;
 };
+
+const functionDeclarationCopy = functionDeclaration;        // Copy could be used as usual: functionDeclarationCopy(argument1, argument2, optionalArgument)
+const functionExpressionCopy = functionExpression;          // Copy could be used as usual: functionExpressionCopy(argument1, argument2)
 
 let arrowFunction = (argument1, argument2) => argument1 + argument2;    // Arrow function.
 

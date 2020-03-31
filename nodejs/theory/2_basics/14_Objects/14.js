@@ -112,7 +112,38 @@ Object.assign(toMerge1, toMerge, toClone);                                  // t
 const toMerge2 = Object.assign({}, toMerge, toMerge1, toClone);      // toMerge2 now contains: property1..5
 
 
-
+/* ----- Symbols ----- */
+// Both and only symbols and strings could be used as object keys. Symbol is a unique identifier.
+const symbol1 = Symbol('1');
+const symbol2 = Symbol('1');
+console.log(symbol1 == symbol2);                    // Output: false        Symbols are unique, even with the same description.
+console.log(symbol1.toString());                    // Output: Symbol(1)    Symbols are not automatically converted to a string by methods. toString() should be used.
+// Symbols are used to hide properties, added to external objects (to prevent influence to external code logic). Symbol property could be accessed only by symbol itself.
+const externalObject = { };                         // Even if external code creates a symbol with the same description - it will be the distinct symbol and distinct key.
+externalObject[symbol1] = 'value1';
+console.log(externalObject[symbol1]);               // Output: value1
+const objectWithSymbol = {
+    [symbol1]: 'value1',
+    symbol2: 'value2'                               // Wrong usage - square brackets should be used.
+};
+console.log(objectWithSymbol[symbol1]);             // Output: value1
+console.log(objectWithSymbol[symbol2]);             // Output: undefined
+for (let key in objectWithSymbol) {                 // Symbol keys are not visible when cycling with a for loop.
+    console.log(key);                               // Output: symbol2.         Only 'wrong' symbol is printed, it was converted to a string 'symbol2'.
+}
+console.log(Object.keys(objectWithSymbol));         // Output: [ 'symbol2' ]    Object.keys() doesn't see symbol properties also.
+const objectWithSymbolClone = Object.assign({}, objectWithSymbol);      // But Object.assign() clones symbol properties.
+console.log(objectWithSymbolClone[symbol1]);        // Output: value1
+// To make symbols equal by description (same description = same symbol = same property) global symbols (global symbols registry) could be used.
+const globalSymbol1 = Symbol.for('1');          // Symbol.for() gets an existing symbol with same description from registry or creates a new symbol in registry.
+const globalSymbol2 = Symbol.for('1');
+console.log(globalSymbol1 === globalSymbol2);       // Output: true
+console.log(Symbol.for('1'));                  // Output: Symbol(1)
+console.log(Symbol.keyFor(globalSymbol1));          // Output: 1
+console.log(Symbol.keyFor(symbol1));                // Output: undefined        symbol1 is not global, global symbol registry is missing symbol1.
+console.log(symbol1.description);                   // Output: 1 !!Should be 1, but undefined in with nodejs!! Description property could be used to get local symbol's key.
+console.log(Object.getOwnPropertySymbols(objectWithSymbol));    // Output: [ Symbol(1) ]    This method gets symbol properties of an object.
+console.log(Reflect.ownKeys(objectWithSymbol));     // Output: [ 'symbol2', Symbol(1) ]     This method gets all properties, including symbols.
 
 
 

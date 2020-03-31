@@ -19,7 +19,7 @@ console.log(typeof anUndefined);    // Output: undefined
 
 
 /* ----- There are 6 object data types. ----- */
-var object = {};    // Simple object.
+var object = {};    // Plain object - not prototyped Object instance (i.e. NOT array, function, date, ...).
 var array = [];     // Array.
 var aFunction = function() {};
 var date = new Date();

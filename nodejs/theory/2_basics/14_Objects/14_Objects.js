@@ -30,10 +30,17 @@ commonObject.propertyObject = {                             // Writing a new pro
     aProperty: 'some value',
     let: 'some value',                                      // Reserved keywords are legal object keys.
     for: 'some value',                                      // Reserved keywords are legal object keys.
-    aMethod: function () {
+    aMethod1: function () {                                 // Property with function value is called a method.
+        // some logic
+    },
+    aMethod2() {                                            // A shorthand version of a method declaration.
         // some logic
     }
 };
+commonObject.aMethod3 = function() {                        // Method could be added with function expression.
+    console.log('aMethod3 was called');
+};
+commonObject.aMethod4 = makeObject;                         // So as function declaration.
 
 function makeObject(name, age) {
     return {
@@ -146,6 +153,72 @@ console.log(Object.getOwnPropertySymbols(objectWithSymbol));    // Output: [ Sym
 console.log(Reflect.ownKeys(objectWithSymbol));     // Output: [ 'symbol2', Symbol(1) ]     This method gets all properties, including symbols.
 
 
+/* ----- this keyword ----- */
+let user = {
+    name: 'Sly',
+    sayThisName() {
+        console.log(this.name);     // 'this' inside a method means 'an object before dot (or before square brackets) in the method call'.
+    },
+    sayUserName() {
+        console.log(user.name);     // Variable name could be used instead of this, but such method will fail if the object is copied to another variable and user becomes null.
+    }
+};
+user.sayThisName();                 // Output: Sly
+user.sayUserName();                 // Output: Sly
+user['sayThisName']();              // Output: Sly
+const aUser = user;
+user = null;
+aUser.sayThisName();                // Output: Sly
+// aUser.sayUserName();             // TypeError: Cannot read property 'name' of null
+
+
+const obj1 = {
+    name: 'obj1'
+};
+const obj2 = {
+    name: 'obj2'
+};
+function printObjName() {
+    console.log(this.name);         // this and this.name value depends on object to which function belongs and are calculated before a function call.
+}
+obj1.printObj = printObjName;
+obj2.printObj = printObjName;
+obj1.printObj();                    // Output: obj1
+obj2.printObj();                    // Output: obj2
+
+// The common rule is if 'this' is used inside a function - it should be called in the context of some object (should be used as a method of some object).
+function printThis() {
+    console.log(this);
+}
+function printThisProperty() {
+    console.log(this.property);
+}
+printThis();                        // Output: undefined    Undefined in strict mode, global object (i.e. window in browser) in non-strict mode.
+// printThisProperty();             // TypeError: Cannot read property 'property' of undefined
+
+
+// this value is ok if method is called like 'obj.method();' or 'obj['method']()'. If parenthesis (function call) are used without 'obj.' - this becomes undefined.
+obj1.printObj();                                // Output: obj1
+const printObjVariable = obj1.printObj;
+// printObjVariable();                          // TypeError: Cannot read property 'name' of undefined
+
+
+const someString = 'some string';
+const globalArrow = () => {                     // Arrow functions have no proprietary 'this'.
+    console.log(this.someString);               // Output: undefined            this of arrow function means this of the closest outer normal function.
+};
+const someObj = {
+    someKey: 'some value',
+    someMethod() {
+        const localArrow = () => {
+            console.log(this.someString);       // Output: undefined            this = someObj. someObj doesn't have 'someString' key.
+            console.log(this.someKey);          // Output: some value
+        };
+        localArrow();
+    }
+};
+globalArrow();
+someObj.someMethod();
 
 
 

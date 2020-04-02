@@ -221,18 +221,83 @@ globalArrow();
 someObj.someMethod();
 
 
+/* ----- Object to primitive cast. ----- */
+// When inner functions or some operators are used on objects, they are cast to primitive values before operation takes place. Some rules are applied for such implicit casting.
+
+// Objects are always boolean in logical context, true for nonnull and defined objects, false otherwise.
+const definedNonNullObject = { },
+    nullObject = null,
+    undefinedObject = undefined;
+if (nullObject) {
+} else if (undefinedObject) {
+} else if (definedNonNullObject) {
+    console.log("Defined and nonnull object is true in logical context.");      // Only definedNonNullObject is true.
+}
+
+/*
+Objects are cast to numbers when subtracting, multiplying, dividing.
+Objects are cast to strings when js suggests string context, for example alert(obj).
+Cast could be customized with the help of special methods of object. Js suggests a hint to cast an object, method should provide according value for a hint.
+Js should suggest:
+* 'string' hint for a string context operations:
+    alert(obj);                      // alert() expects a string. Explicit String() cast is used in following code to emulate alert() calls().
+    anotherObj[obj] = null;          // anotherObject's property access expects a string
+* 'number' hint for a number context operations:
+    const num = Number(obj);         // Explicit cast to number expects obj to be a number
+    const increment = +obj;          // Unary plus operator expects obj to be a number
+    const value = obj1 - obj2;       // Subtracting objects expects both obj1 and obj2 to be numbers.
+    const gtOrLt = obj1 > obj2;      // Comparing objects expects both obj1 and obj2 to be numbers.
+* 'default' hint is used when js's not sure which to use (string/number, both possibly could be used). All inner js objects except Date treat 'default' hint as a 'number' hint.
+    const num = obj1 + obj2;         // Both obj1 and obj2 could possibly be numbers and strings.
+    if (obj == 1) ...                // Obj could be a number/string/symbol.
+So, in fact, there are only two hints to be handled - 'string' and 'number'/'default'. 'default' should be handled like 'number', so as inner js objects are doing.
+Js engine tries tree steps to cast an object:
+1. Call obj[Symbol.toPrimitive](hint) method if exists and return the result. If no such method:
+2. For a 'string' hint - calls obj.toString() if exists or obj.valueOf() otherwise. Both methods are stale methods of object casting and shouldn't be used.
+3. For both 'number' and 'default' hints - calls obj.valueOf() if exists or obj.toString() otherwise.
+*/
+const withToPrimitive = {
+    name: 'Valery',
+    age: 45,
+    [Symbol.toPrimitive](hint) {                                            // This single method handles all possible types of hint.
+        return hint === 'string' ? `name is ${this.name}` : this.age;
+    }
+};
+console.log(String(withToPrimitive));          // Output: name is Valery       hint === 'string'
+console.log(+withToPrimitive);                 // Output: 50                   hint === 'number'
+console.log(withToPrimitive + 5);              // Output: 50                   hint === 'default'
+const withToStringAndValueOf = {               // Implements the same logic with stale toString() and valueOf() methods.
+    name: 'Valery',
+    age: 45,
+    toString() {
+        return `name is ${this.name}`;
+    },
+    valueOf() {
+        return this.age;
+    }
+};
+console.log(String(withToStringAndValueOf));    // Output: name is Valery       hint === 'string'
+console.log(+withToStringAndValueOf);           // Output: 50                   hint === 'number'
+console.log(withToPrimitive + 5);               // Output: 50                   hint === 'default'
+// Single toString() method is often used to handle all possible hints. There should be no Symbol.toPrimitive(hint) nor valueOf() methods in this case.
+const withToStringOnly = {
+    toString() {
+        return '2';
+    }
+};
+console.log(String(withToStringOnly));          // Output: 2                    hint === 'string'
+console.log(+withToStringOnly);                 // Output: 2                    hint === 'number'
+console.log(withToStringOnly + 5);              // Output: 25                   hint === 'default'
+// All 3 methods Symbol.toPrimitive(hint), toString(), valueOf() could return any type of primitive regardless hint.
+// Object is not allowed value to return, both toString() and valueOf() ignore object return value, toPrimitive() throws error if object is returned.
+// Returned primitive will be cast to a type, according to js common rules.
+const castToString = {
+    toString() {
+        return '2';
+    }
+};
+console.log(castToString * 2);                  // Output: 4    castToString cast returns a string, then cast to a number because of multiply operation expects a number.
+console.log(castToString + 2);                  // Output: 22   castToString cast returns a string, then is used as a string because concatenation expects a string.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* ----- Object constructors, new keyword ----- */

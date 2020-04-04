@@ -300,4 +300,69 @@ console.log(castToString * 2);                  // Output: 4    castToString cas
 console.log(castToString + 2);                  // Output: 22   castToString cast returns a string, then is used as a string because concatenation expects a string.
 
 
-/* ----- Object constructors, new keyword ----- */
+/* ----- Constructors === Function Constructors == Object constructors. The 'new' keyword ----- */
+
+/*
+To create numerous similar objects function constructors are used.
+Function constructor is a common function, but there are 2 agreements:
+  1. function name starts with a capital letter
+  2. function is called using the keyword new
+Technically every function could be called using the new keyword, but proper constructor function should follow 2 agreements listed above.
+*/
+function User(name) {
+    this.name = name;
+    this.isAdmin = false;
+}
+function User1(name) {                                      // This function does the same as User function constructor.
+    // this = { };                                          // Implicit logic.
+    this.name = name;
+    this.isAdmin = false;
+    // return this;                                         // Implicit logic.
+}
+const constructedUser = new User('Kevin');            // new User() call actually does: 1.create empty object; 2.assign inner variables; 3.return this value.
+const constructedUser1 = new User1('Kevin');          // Result of User1() call is just the same.
+const declaredUser = {                                      // The properties of declaredUser are just the same as of constructedUsers.
+    name: 'Kevin',
+    isAdmin: false
+};
+console.log(constructedUser);                               // Output: User { name: 'Kevin', isAdmin: false }
+console.log(constructedUser1);                              // Output: User1 { name: 'Kevin', isAdmin: false }
+console.log(declaredUser);                                  // Output: { name: 'Kevin', isAdmin: false }
+
+// new.target function's property could be used to check if a function was called with or without a new keyword.
+function User2() {
+    console.log(new.target);
+}
+User2();                                                    // Output: undefined
+new User2();                                                // Output: [Function: User2]
+console.log(new User2);                                     // Output: [Function: User2]    // Function constructor without arguments call could skip parentheses.
+/*
+new.target is used sometimes to allow user create objects with or without the new keyword.
+Such usage is recognized as a bad practice - new keyword makes objects creation explicit and clear.
+*/
+function User3(name) {
+    if (!new.target) {
+        return new User3(name);
+    }
+    this.name = name;
+}
+console.log(User3('Kevin'));                          // Output: User3 { name: 'Kevin' }
+
+function ReplaceReturnThis() {
+    this.property = '1';
+    return { property: '2' };                               // Function constructor can return object other than this.
+}
+console.log(new ReplaceReturnThis());                       // Output: { property: '2' }
+function TryReplaceReturnThisWithPrimitive() {
+    this.property = '1';
+    return '2';                                             // Empty or primitive return is ignored - this is returned  on call.
+}
+console.log(new TryReplaceReturnThisWithPrimitive());       // TryReplaceReturnThisWithPrimitive { property: '1' }
+
+function ConstructorWithMethod() {
+    this.property = '1';
+    this.method = function() {                              // Methods could be defined within function constructors.
+        console.log('The method was called.');
+    };
+}
+new ConstructorWithMethod().method();                       // Output: The method was called.

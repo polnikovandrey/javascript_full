@@ -80,3 +80,21 @@ console.log('Person age: ' + personAge);
 /* ----- Array is a type of object, which holds values under indexed properties. ----- */
 let array1 = ['value0', 'value1', 'value2'];
 console.log('Array value at zero index: ' + array1[0]);     // Output: value0
+
+
+/* ----- Primitive as object ----- */
+// There are 4 primitive wrappers (objects) - Boolean, String, Number, Symbol. When a method is called on primitive - actually a wrapper is created and it's method is called.
+// There are constructors, which make possible to create wrappers. But it's highly recommended to avoid explicit wrappers creation.
+let zero = new Number(0);
+if (zero) {                                             // Object is always true in logical context, zero becomes true here.
+    console.log(typeof 0);                              // Output: number
+    console.log(typeof new Number(0));            // Output: object
+}
+// Instead of wrapper creation with the new operator - casting to specific primitive type usage is acceptable.
+console.log(Number("123"));                       // Output: 123        It's ok to cast to a number.
+// Both null and undefined primitive types has no wrappers, so there are no methods for those types.
+// console.log(null.test);                              // Error: Cannot read property 'test' of null
+// Primitive wrappers could'n be used to store a property/method. Error in strict mode, empty in non-strict mode (because wrapper-object is reconstructed each time).
+let primitiveToStoreAProperty = '123';
+// primitiveToStoreAProperty.test = 'test';             // Error: cannot create property 'test' on string '123'.        (in strict mode)
+// console.log(primitiveToStoreAProperty.test);         // Output: undefined.                                           (in not-strict mode)

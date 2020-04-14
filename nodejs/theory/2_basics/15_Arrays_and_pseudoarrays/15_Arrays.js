@@ -94,16 +94,61 @@ const array = [1, 2, 3, 4, 5, 6, 7, 8];
 const slicedArray = array.slice(1, 3);          // slice() copies and returns an array of 3 elements, starting with index n, ending with index (m - 1)
 console.log(array);                             // Output: [ 1, 2, 3, 4, 5, 6, 7, 8 ]
 console.log(slicedArray);                       // Output: [ 2, 3 ]
+const slicedArray1 = array.slice(-4, -2);       // Both start and end could be negative, indexes are calculated from the last element (-1 means last element).
+console.log(slicedArray1);                      // Output: [ 5, 6 ]
+const slicedArray2 = array.slice(-2, -4);       // Order of start/end is important, should be from start to begin.
+console.log(slicedArray2);                      // Output: []
+const slicedArray3 = array.slice(4);            // End parameter could be skipped, the rest of array starting with start parameter is returned.
+console.log(slicedArray3);                      // Output: [ 5, 6, 7, 8 ]
+const copiedArray = array.slice();              // slice() without parameters copies an array.
+copiedArray[0] = 111;
+console.log(copiedArray);                       // Output: [ 111, 2, 3, 4, 5, 6, 7, 8 ]     Copy of array was modified.
+console.log(array);                             // Output: [ 1, 2, 3, 4, 5, 6, 7, 8 ]       Original array stays intact.
+
 const splicedArray = array.splice(1, 3);    // splice() deletes and returns an array of m elements, starting with index n
 console.log(array);                             // Output: [ 1, 5, 6, 7, 8 ]
 console.log(splicedArray);                      // Output: [ 2, 3, 4 ]
+const splicedArray1 = splicedArray.splice(1, 1, 33, 333, 3333);      // splice() could also replace deleted elements with items provided.
+console.log(splicedArray);                      // Output: [ 2, 33, 333, 3333, 4 ]
+console.log(splicedArray1);                     // Output: [ 3 ]
+const splicedArray2 = splicedArray.splice(4, 0, 33333, 333333);      // splice() could also insert items without deletion of elements.
+console.log(splicedArray);                      // Output: [ 2, 33, 333, 3333, 33333, 3333333, 4 ]
+console.log(splicedArray2);                     // Output: []
+const splicedArray3 = splicedArray.splice(-2, 1, 444444);           // splice() with negative start parameter counts index from the end of an array.
+console.log(splicedArray);                      // Output: [ 2, 33, 333, 3333, 33333, 444444, 4 ]       Note: -1 start parameter means the last element
+console.log(splicedArray3);                     // Output: [ 333333 ]
+
 const reversedArray = splicedArray.reverse();   // Reverses and returns original array.
-console.log(splicedArray);                      // Output: [ 4, 3, 2 ]
-console.log(reversedArray);                     // Output: [ 4, 3, 2 ]
-const concatArray = reversedArray.concat(1, 0); // concat() copies original array and appends provided elements.
-console.log(reversedArray);                     // Output: [ 4, 3, 2 ]
-console.log(concatArray);                       // Output: [ 4, 3, 2, 1, 0 ]
-delete array[1];                                // delete array[index]      deletes element with specific index
+console.log(splicedArray);                      // Output: [ 4, 444444, 33333, 3333, 333, 33, 2 ]
+console.log(reversedArray);                     // Output: [ 4, 444444, 33333, 3333, 333, 33, 2 ]
+
+const concatArray = reversedArray.concat(1, 0, -1);     // concat() copies original array and appends copies and concatenates elements provided.
+console.log(reversedArray);                     // Output: [ 4, 444444, 33333, 3333, 333, 33, 2 ]
+console.log(concatArray);                       // Output: [ 4, 444444, 33333, 3333, 333, 33, 2, 1, 0, -1 ]
+const toConcatArray = [-2, -3];
+const concatArray1 = concatArray.concat(toConcatArray, -4, -5);     // Any number of arguments could be arrays, theirs elements are copied and concatenated.
+console.log(concatArray1);                      // Output: [ 4, 444444, 33333, 3333, 333, 33, 2, 1, 0, -1, -2, -3, -4, -5 ]
+const originalArray = [1, 2];
+const arrayLikeObject = {                       // Array-like objects are concatenated as is, like objects.
+    0: 3,
+    1: 4,
+    length: 2
+};
+const withArrayLikeElementArray = originalArray.concat(arrayLikeObject);
+console.log(withArrayLikeElementArray);         // Output: [ 1, 2, { '0': 3, '1': 4, length: 2 } ]
+// To handle as-array concatenation an array-like object should have number-key properties, length property and Symbol.isConcatSpreadable property set to true.
+const concatSpreadableArrayLikeObject = {
+    0: 3,
+    1: 4,
+    length: 2,
+    [Symbol.isConcatSpreadable]: true
+};
+const withConcatSpreadableArrayLikeObjectArray = originalArray.concat(concatSpreadableArrayLikeObject);
+console.log(withConcatSpreadableArrayLikeObjectArray);      // Output: [ 1, 2, 3, 4 ]
+
+
+
+delete array[1];                                // delete array[index]      deletes a value at specified index, array's length stays intact.
 console.log(array);                             // Output: [ 1, <1 empty item>, 3, 4, 5, 6, 7, 8 ]
 
 const arrayWithLength = [1, 2, 3, 4, 5];
@@ -127,3 +172,4 @@ console.log([1, 2] + 1);                        // Output: 1,21
 
 // Pseudo arrays are objects with array-like key-value pairs (keys are numbers, values are of arbitrary types).
 // Pseudo arrays differ from arrays in fact they don't have array's methods (pop, shift, push, unshift, split, sort, ...)
+

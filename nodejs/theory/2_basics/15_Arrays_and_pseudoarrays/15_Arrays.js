@@ -78,6 +78,10 @@ console.log(output);                // Output: one two three    for (of) cycles 
 const stringWithDividers = '111,222,333,444';
 const arrayOfStrings = stringWithDividers.split(',');                   // array = string.split()
 console.log(`length: ${arrayOfStrings.length}, array: ${arrayOfStrings}`);      // Output: length: 4, array: 111,222,333,444
+const arrayOfStrings1 = stringWithDividers.split(',', 2);         // limit argument could limit the length of resulting array, elements over limit are ignored.
+console.log(arrayOfStrings1);                                                   // Output: [ '111', '222' ]
+const lettersArray = 'aString'.split('');                              // split() with empty string could used to split string into distinct letters.
+console.log(lettersArray);                                                      // Output: [ 'a', 'S', 't', 'r', 'i', 'n', 'g' ]
 const joinedArrayString = arrayOfStrings.join(',');                             // string = array.join()
 console.log(joinedArrayString);                                                 // Output: 111,222,333,444
 
@@ -173,3 +177,95 @@ console.log([1, 2] + 1);                        // Output: 1,21
 // Pseudo arrays are objects with array-like key-value pairs (keys are numbers, values are of arbitrary types).
 // Pseudo arrays differ from arrays in fact they don't have array's methods (pop, shift, push, unshift, split, sort, ...)
 
+const toSearchArray = ['a', 0, 777, false, 777, NaN];
+console.log(toSearchArray.indexOf(777));            // Output: 2
+console.log(toSearchArray.lastIndexOf(777));        // Output: 4
+console.log(toSearchArray.indexOf(false));          // Output: 3        indexOf() search uses strict equality check, so strict false value is being searched (not 0).
+console.log(toSearchArray.indexOf('no such value'));// Output: -1       -1 return value means 'value was not found'.
+console.log(toSearchArray.includes('a'));           // Output: true     If index is not necessary - one should prefer includes() method.
+console.log(toSearchArray.indexOf(NaN));            // Output: -1
+console.log(toSearchArray.lastIndexOf(NaN));        // Output: -1       Both indexOf()/lastIndexOf do not work with NaN, because NaN !== NaN
+console.log(toSearchArray.includes(NaN));           // Output: true     But includes() is able to locate NaN.
+
+
+// find() iterates over elements, argument function should return true for searched element. Function find() returns found element or undefined otherwise.
+const users = [
+    { id: 1, name: 'volta'},
+    { id: 2, name: 'ampere'},
+    { id: 3, name: 'watt'}
+];
+console.log(users.find(function(item, index, array) {
+    return item.id === 3;
+}));                                                                                                                            // Output: { id: 3, name: 'watt' }
+console.log(users.find((item, index, array) => item.id === 2));      // Output: { id: 2, name: 'ampere' }
+console.log(users.find(item => item.id === 4));                                                                        // Output: undefined
+
+// findIndex() does the same as find(), but returns found index or -1 otherwise.
+console.log(users.findIndex(function(item, index, array) {
+    return item.name === 'ampere';
+}));                                                                                                                           // Output: 1
+
+// filter() returns an array of all matching elements or empty array if none match.
+console.log(users.filter(function(item, index, array) {
+    return item.id === 1 || item.id === 3;
+}));                                                                                                                // Output: [ { id: 1, name: 'volta' }, { id: 3, name: 'watt' } ]
+
+// map() transforms each element to something else and returns array of transformed elements.
+console.log(users.map(function(item, index, array) {
+    return `id: ${item.id}`;
+}));                                                                                                                // Output: [ 'id: 1', 'id: 2', 'id: 3' ]
+const mapToObjectsArray = users.map(item => ({              // Note additional braces. Otherwise js will treat curly braces as start of a function, not object.
+    id: item.id
+}));
+console.log(mapToObjectsArray);                                                                                     // Output: [ { id: 1 }, { id: 2 }, { id: 3 } ]
+
+// reduce() is used to produce some value out of all array elements. Note: if initialValue is skipped - the starting previousValue equals 0 index element value, iteration starts
+// from element with index 1. But there will be an error if no initialValue and array is empty. So initialValue should be present in all cases.
+const initialValue = 'Users:';
+console.log(users.reduce(function(previousValue, item, index, array) {
+    return `${previousValue} ${item.name}`;
+}, initialValue));                                                                                                  // Output: Users: volta ampere watt
+
+// reduceRight() does the same as reduce(), but starts iteration from the beginning.
+console.log(users.reduceRight(function(previousValue, item, index, array) {
+    return `${previousValue} ${item.name}`;
+}, initialValue));                                                                                                  // Output: Users: watt ampere volta
+
+// some() returns true if any element matches.
+console.log(users.some(function(item, index, array) {
+    return item.id > 2;
+}));                                                                                                               // Output: true
+
+// every() returns true if all element match.
+console.log(users.every(function(item, index, array) {
+    return item.id < 4;
+}));                                                                                                                // Output: true
+
+// fill() fills an array with the same value from start index inclusive to end index exclusive.
+const toFillArray = [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ];
+console.log(toFillArray.fill(333, 2, 4));                                                           // Output: [ 1, 2, 333, 333, 5, 6, 7, 8, 9 ]
+
+// copyWithin() copies and inserts array's chunk from start index inclusive to end index exclusive to the target index.
+const toCopyWithinArray = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 'a', 'b', 'c', 0 ];
+console.log(toCopyWithinArray.copyWithin(1, 9, 12));                                               // Output: [ 1, 'a', 'b', 'c', 5, 6, 7, 8, 9, 'a', 'b', 'c', 0 ]
+
+
+// Almost every array method, which takes function as an argument, has optional last argument thisArg. It provides 'this' context to the function argument.
+const adultUserCriteria = {
+    age: 18,
+    isAdult(user) {
+        return user.age >= this.age;
+    }
+};
+const users1 = [ { id: 1, age: 16 }, { id: 2, age: 20 }, { id: 3, age: 78 } ];
+// console.log(users1.filter(adultUserCriteria.isAdult));                       // TypeError: Cannot read property 'age' of undefined       * because this === undefined
+console.log(users1.filter(adultUserCriteria.isAdult, adultUserCriteria));       // Output: [ { id: 2, age: 20 }, { id: 3, age: 78 } ]
+
+
+// typeof couldn't be used to differ an array from the object. Array.isArray() should be used to define an array.
+console.log(typeof { });                // Output: object
+console.log(typeof [ ]);                // Output: object
+console.log(Array.isArray({ }));    // Output: false
+console.log(Array.isArray([ ]));    // Output: true
+
+// Note: it's urgent to remember - sort(), reverse() and splice() methods mutate original array!

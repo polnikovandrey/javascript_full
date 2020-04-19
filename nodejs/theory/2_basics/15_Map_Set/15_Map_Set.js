@@ -109,3 +109,47 @@ aWeakMapObject = null;      // aWeakMap object would be garbage collected - ther
 // WeakSet is also used to store object, which become not accessible and are being garbage collected when there are no links to the object left.
 // WeakSet could store only objects. It has only add(), has() and delete() methods and is not iterable.
 // Use case: to store only logged-in users data and to check if user is logged in (WeakSet.has(user)). Logged out users loose references and are cleaned from a WeakSet.
+
+
+/* Object.keys, values, entries */
+
+// Map, Set, Array support keys(), values() and entries() methods. One should also implement those method for data structure to follow js convention.
+// Object type supports those methods also, but not directly (through Object type) and syntax is a little bit different.
+// Object could have it's own keys(), values(), entries() methods, but it could be used with Object.method() also.
+// Object.keys(obj), Object.values(obj) and Object.entries(obj) method return arrays, on the contrary Map/Set/Array methods return iterable object.
+const user = {
+    name: 'John',
+    age: 20,
+    [Symbol.name]: 'user'
+};
+console.log(Object.keys(user));     // Output: [ 'name', 'age' ]
+console.log(Object.values(user));   // Output: [ 'John', 20 ]
+console.log(Object.entries(user));  // Output: [ [ 'name', 'John' ], [ 'age', 20 ] ]
+
+const aMap1 = new Map();
+aMap.set(1, 2);
+aMap.set('3', '4');
+console.log(Array.isArray(aMap.keys()));            // Output: false
+console.log(Array.isArray(Object.keys(aMap)));      // Output: true
+
+// Object.keys/values/entries ignores Symbol-key properties (as for..in cycle does). To get Symbol-key properties only Object.getOwnPropertySymbols() should be used.
+// To get all properties including Symbol-key properties - Reflect.ownKeys(obj) method should be used.
+const objectWithSymbolKeyProperty = {
+    commonKey: '',
+    [Symbol.toPrimitive](hint) {                                            // This single method handles all possible types of hint.
+        return hint === 'string' ? `1` : 1;
+    }
+};
+console.log(Object.keys(objectWithSymbolKeyProperty));                          // Output: [ 'commonKey' ]
+console.log(Object.getOwnPropertySymbols(objectWithSymbolKeyProperty));         // Output: [ Symbol(Symbol.toPrimitive) ]
+console.log(Reflect.ownKeys(objectWithSymbolKeyProperty));                      // Output: [ 'commonKey', Symbol(Symbol.toPrimitive) ]
+
+// Object has no array-like methods - map(), filter(), ... To use those methods on objects one should get entries Object.entries(obj), modify, then convert back to object
+// with the Object.fromEntries(obj) method.
+const prices = {
+    apple: 2,
+    banana: 3,
+    cherry: 5
+};
+// const doublePrices = Object.fromEntries(Object.entries(prices).map(([key, value]) => [key, value * 2]));     // Object.fromEntries is not implemented in NodeJs.
+// console.log(prices);     // Output: { apple: 4, banana: 6, cherry: 10 }

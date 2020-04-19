@@ -1,5 +1,7 @@
 'use strict';           // jshint ignore: line
 
+/* Map, Set */
+
 // Map is used to store key-value pairs like Object. Object's key is always of a string type, Map's key could be of any data type.
 // Map uses SameValueZero comparison algorithm to find values. It's same as === comparison, but NaN is equal to Nan (so NaN could be used as a key).
 // To know methods: new Map(iterable), set(), get(), has(), delete(), clear(), .size
@@ -68,7 +70,7 @@ console.log(set.delete(2));       // Output: true
 console.log(set.has(3));          // Output: true
 set.clear();
 
-// Set could be cycled both with for..of and forEach().
+// Set could be cycled both with for..of and forEach(). Iterates in insertion order (remember that duplicate add() is ignored).
 const set1 = new Set([1, 2, 3]);
 let setAccum = '';
 for (let value of set1) {
@@ -80,3 +82,30 @@ set1.forEach((value, sameValue, set) => {
     setAccum += value;
 });
 console.log(setAccum);      // Output: 123 | 123
+
+
+
+/* WeakMap, WeakSet */
+
+// Both WeakMap and WeakSet are used to store data (objects), whose accessibility is controlled somewhere outside of code, which uses those data structures.
+// WeakMap and WeakSet support garbage collection of objects, stored in them, if no other links to those objects exist.
+// WeakMap's key should be an object. WeakMap has no methods to get all keys/values/entries/size (no keys(), values(), entries(), size() methods) and not iterable.
+// The reason is the fact that it's unknown when exactly js garbage collection implementation should discard stale objects.
+// WeakMap supports only methods: get(), set(), delete(), has().
+// WeakMap is used to store data (value), which is logically tied to the key object and should be garbage collected when the key object is no longer accessible.
+// In other words - the value in a WeakMap is garbage collected alongside with the key object, then it becomes inaccessible (besides the WeakMap itself).
+// Use case: to store logged user session data, which is no longer needed when user log out.
+// Use case: a cache implementation, which is automatically cleaned up when the cache key is no longer accessible.
+const aMap = new Map();
+let aMapObject = { };
+aMap.set(aMapObject, '');
+aMapObject = null;          // aMapObject won't be garbage collected - it is contained in the aMap and is accessible.
+
+const aWeakMap = new WeakMap();
+let aWeakMapObject = { };
+aWeakMap.set(aWeakMapObject, '');
+aWeakMapObject = null;      // aWeakMap object would be garbage collected - there are no references to it besides the aWeakMap.
+
+// WeakSet is also used to store object, which become not accessible and are being garbage collected when there are no links to the object left.
+// WeakSet could store only objects. It has only add(), has() and delete() methods and is not iterable.
+// Use case: to store only logged-in users data and to check if user is logged in (WeakSet.has(user)). Logged out users loose references and are cleaned from a WeakSet.

@@ -1,6 +1,6 @@
 'use strict';           // jshint ignore: line
 
-/* Map, Set */
+/* Map, Set. */
 
 // Map is used to store key-value pairs like Object. Object's key is always of a string type, Map's key could be of any data type.
 // Map uses SameValueZero comparison algorithm to find values. It's same as === comparison, but NaN is equal to Nan (so NaN could be used as a key).
@@ -85,7 +85,7 @@ console.log(setAccum);      // Output: 123 | 123
 
 
 
-/* WeakMap, WeakSet */
+/* WeakMap, WeakSet. */
 
 // Both WeakMap and WeakSet are used to store data (objects), whose accessibility is controlled somewhere outside of code, which uses those data structures.
 // WeakMap and WeakSet support garbage collection of objects, stored in them, if no other links to those objects exist.
@@ -111,7 +111,7 @@ aWeakMapObject = null;      // aWeakMap object would be garbage collected - ther
 // Use case: to store only logged-in users data and to check if user is logged in (WeakSet.has(user)). Logged out users loose references and are cleaned from a WeakSet.
 
 
-/* Object.keys, values, entries */
+/* Object.keys()/values()/entries(). */
 
 // Map, Set, Array support keys(), values() and entries() methods. One should also implement those method for data structure to follow js convention.
 // Object type supports those methods also, but not directly (through Object type) and syntax is a little bit different.
@@ -153,3 +153,132 @@ const prices = {
 };
 // const doublePrices = Object.fromEntries(Object.entries(prices).map(([key, value]) => [key, value * 2]));     // Object.fromEntries is not implemented in NodeJs.
 // console.log(prices);     // Output: { apple: 4, banana: 6, cherry: 10 }
+
+
+
+/* Destructuring assignment. */
+
+// Destructuring assignment is used to "unpack" an array or an object to a collection of distinct properties. Is useful to handle complex functions with numerous
+// parameters and default values.
+// The full destructuring syntax for an array is: let [item1 = default, item2, ...rest] = array
+const arrayToDestructure = [ '1', '2' ];
+const [ firstElement, secondElement ] = arrayToDestructure;
+const
+    firstElementAnalogue = arrayToDestructure[0],
+    secondElementAnalogue = arrayToDestructure[1];              // This is the complete analogue of destructuring assignment above.
+console.log(arrayToDestructure);    // Output: [ '1', '2' ]     Source array was not destructured, it was just copied.
+console.log(firstElement);          // Output: 1
+console.log(secondElement);         // Output: 2
+
+const [ elementOne, elementTwo] = '1 2'.split(' ');     // It's convenient to use destructuring assignment with the split() method.
+console.log(elementOne);            // Output: 1
+console.log(elementTwo);            // Output: 2
+
+const[ neededElement1, , neededElement3 ] = [ '1', '2', '3' ];                  // Unneeded elements could be skipped.
+console.log(`Needed elements: ${neededElement1} and ${neededElement3}`);        // Output: Needed elements: 1 and 3
+
+// Any iterable could be used for destructuring assignment.
+const [ a, b, c ] = 'abc';
+const [ one, two, three ] = new Set([ 1, 2, 3 ]);
+
+// Anything could be used to store destructuring assignment values, including object properties.
+// const storage = { };
+// const [ storage.first, storage.second ] = [ 1, 2 ];       // Do not work, but stated as possible by learn.javascript.ru .
+
+// Destructuring assignment could be used to cycle through objects and maps.
+const anObjectToCycle = { aFirst: 1, aSecond: 2 };
+let accum = '';
+for (let [ aFirst, aSecond ] of Object.entries(anObjectToCycle)) {
+    accum += `${aFirst}: ${aSecond}, `;
+}
+console.log(accum);                 // Output: aFirst: 1, aSecond: 2,
+accum = '';
+const aMapToCycle = new Map();
+aMapToCycle.set('aFirst', 1);
+aMapToCycle.set('aSecond', 2);
+for (let [ aFirst, aSecond ] of aMapToCycle) {
+    accum += `${aFirst}: ${aSecond}, `;
+}
+console.log(accum);                 // Output: aFirst: 1, aSecond: 2,
+
+// ... operator could be used with destructuring assignment to get the rest of elements as an array. ...arrayName shold be the last destructuring parameter.
+const [ theFirst, theSecond, ...rest ] = [ 'One', 'Two', 'Three', 'Four' ];
+console.log(theFirst);              // Output: one
+console.log(theSecond);             // Output: two
+console.log(rest);                  // Output: [ 'Three', 'Four' ]
+
+// If destructuring parameter is absent in object/map - it's value becomes undefined. Default value or default function could be declared to fill absent values.
+const [ withoutDefault, withDefaultValue = 'Default value', withDefaultFunction = function() { return 'Default function'; }()] = [ ];
+console.log(withoutDefault);        // Output: undefined
+console.log(withDefaultValue);      // Output: Default value
+console.log(withDefaultFunction);   // Output: Default function
+
+
+// Objects could be destructured also.
+// The full destructuring syntax for an object is: let {prop : varName = default, ...rest} = object
+// Resulting values are mapped to object's keys by name, so the order of variables in the left part is not essential.
+// Object's entry could be mapped to a different key name with the help of semicolon : operator. Default values/functions could be used for absent entries also.
+// : and = operators could be combined.
+const toDestructureObject = {
+    firstName: 'first',
+    lastName: 'last',
+    surName: 'sur',
+    otherProperty: ''           // Not every entry should be used, this particular property will be skipped.
+};
+const { surName, firstName, lastName: last, absent1 : mappedAbsent1 = 'absent1', absent2 = function() { return 'absent2';}() } = toDestructureObject;
+console.log(surName);       // Output: sur
+console.log(firstName);     // Output: first
+console.log(last);          // Output: last
+console.log(mappedAbsent1);       // Output: absent1
+console.log(absent2);       // Output: absent2
+
+// ... operator could be used to map destructured object's entries to properties, not declared in the left part. The ...object is mapped as an object (not array).
+// Polyfill is necessary to use ... with objects in older IE versions.
+const { surName: sName, ...theRest } = toDestructureObject;
+console.log(sName);         // Output: sur
+console.log(theRest);       // Output: { firstName: 'first', lastName: 'last', otherProperty: '' }
+
+// Syntax feature:
+let fn, ln, sn;                                                             // constants couldn't be used for destructuring assignment when declared outside of expression.
+// { firstName: fn, lastName: ln, surName: sn} = toDestructureObject;       // Error - js treats {} as block of code. Parentheses should be used to map to outer declared variables.
+({ firstName: fn, lastName: ln, surName: sn} = toDestructureObject);
+console.log(`${fn} ${ln} ${sn}`);                                           // Output: first last sur
+
+// Enclosed destructuring assignment could be used to map the object with inner objects and arrays.
+const withObjectAndArray = {
+    anObject: {
+        prop1: '1',
+        prop2: '2'
+    },
+    anArray: [ '3', '4' ]
+};
+const {
+    anObject: {
+        prop1,
+        prop2
+    },
+    anArray: [ item1, item2 ]
+} = withObjectAndArray;
+console.log(`${prop1} ${prop2} ${item1} ${item2}`);         // Output: 1 2 3 4
+
+// Destructuring assignment is widely used to handle numerous-args with default values functions, especially often in client-side programming.
+function withNumerousParameters(one = 'one', two = 'two', three = 'three', four = [], five = {}) {
+    console.log(`${one} ${two} ${three} ${four} ${five.value}`);
+}
+// Imagine the situation when only 1 argument should be passed (default values are ok for the rest).
+withNumerousParameters(undefined, undefined, undefined, [ '1', '2' ], { value: 3 });              // Output: one two three 1,2 3
+// The above call looks ugly, destructive assignment comes to the rescue. Note: argument mapping with semicolon : could be combined with default values, so as enclosed
+// objects/arrays destructuring assignment.
+function convenientParameters({ one : o = 'one', two: tw= 'two', three : th= 'three', four: fo = [], five: fi = {}}) {
+    console.log(`${o} ${tw} ${th} ${fo} ${fi.value}`);
+}
+convenientParameters({ four: [ '1', '2'], five: { value: 3 }});     // Output: one two three 1,2 3
+// The only inconvenience is the fact that an object SHOULD be passed as an argument, possibly empty object. If no object passed - the error will occur.
+convenientParameters({});       // Output: one two three  undefined
+// convenientParameters();      // ypeError: Cannot destructure property `one` of 'undefined' or 'null'.
+// To overcome this inconvenience - default value for the whole parameter-object should be used.
+function superConvenientParameters({one : o = 'one', two: tw= 'two', three : th= 'three', four: fo = [], five: fi = {}} = {}) {
+    console.log(`${o} ${tw} ${th} ${fo} ${fi.value}`);
+}
+superConvenientParameters();        // Output: one two three  undefined         All arguments are used with default values.
+

@@ -77,3 +77,129 @@ console.log(Array.from('Hello!'));      // Output: [ 'H', 'e', 'l', 'l', 'o', '!
 (function iife() {
     console.log('IIFE');
 })();                       // Output: IIFE
+
+
+/* var stale keyword. */
+
+// In contrast to let and const, var do not obey all code block scope restrictions.
+// The scope of var is limited by a function for local variables or by a script for global variables, other code blocks do not limit var's scope.
+function withVar() {
+    const insideFunctionConst = 'Not usable outside of the function';
+    let insideFunctionLet = 'Not usable outside of the function';
+    var insideFunctionVar = 'Not usable outside of the function';
+}
+// console.log(insideFunctionConst);    // ReferenceError: insideFunctionVar is not defined
+// console.log(insideFunctionVar);      // ReferenceError: insideFunctionVar is not defined
+// console.log(insideFunctionLet);      // ReferenceError: insideFunctionVar is not defined
+if (true) {
+    const insideIfCodeBlockConst = 'Not usable outside of the code block';
+    let insideIfCodeBlockLet = 'Not usable outside of the code block';
+    var insideIfCodeBlockVar = 'Usable outside of the code block';      // var is a local variable only inside a function, global otherwise.
+}
+// console.log(insideIfCodeBlockConst);     // ReferenceError: insideFunctionVar is not defined
+// console.log(insideIfCodeBlockLet);       // ReferenceError: insideFunctionVar is not defined
+console.log(insideIfCodeBlockVar);          // Usable outside of the code block
+
+for (var i = 0; i < 10; i++) { }
+console.log(i);                 // Output: 9    var is a global variable. Use 'let' to limit the scope of a variable to the the cycle code block.
+for (let j = 0; j < 10; j++) { }
+// console.log(j);              // ReferenceError: j is not defined
+
+// local var declaration is handled at the beginning of a function execution, global var - at the beginning of a script execution (regardless of the actual line position).
+(function amazingVars() {
+    sadButTrue = true;          // var is declared already regardless the fact that var declaration is below this line and var code block will never be executed.
+    console.log(declaredButNotAssignedYet);     // Output: undefined    variable is declared, but the value was not assigned yet.
+    declaredButNotAssignedYet = true;
+    if (false) {
+        var sadButTrue;
+    }
+    var declaredButNotAssignedYet;
+    console.log(sadButTrue);                    // Output: true        This var behavior is called "hoisting".
+})();
+
+
+
+/* Global object. */
+// Global object provides access to global variables and functions, including built-in. It's name is 'window' in a browser, 'global' in a NodeJs environment, could differ
+// in other js environments. New js conventions suggest to name it 'globalThis', one should check support before usage, there is a polyfill in case it's not supported.
+// Code below should be run in a browser to work properly, it uses a 'window' as the global object.
+
+// Global object's variables and functions could be accessed directly.
+/*
+alert("true");           // That call
+window.alert(true);      // totally matches this.
+*/
+
+// var becomes a global object's variable, let - doesn't (scope is limited to the containing script).
+// In modern projects, which use modules to limit the scope, var does not become a global variable.
+/*
+var globalVar = true;
+window.alert(window.globalVar);         // Output: true
+let notGlobalVar = true;
+window.alert(window.notGlobalVar);      // Output: undefined
+*/
+
+// var shouldn't be used to declare global variables. Explicit declaration should be used instead.
+/*
+window.customGlobalVar = true;
+console.log(customGlobalVar);           // OK
+console.log(window.customGlobalVar);    // OK   Explicit access could be used in case there is the local variable with the same name.
+*/
+
+// Global object contains built-in properties to check if some features are supported or not.
+/*
+if (!window.Promise) {
+    window.Promise = {
+        // Polyfill or implementation goes here.
+    };
+}
+*/
+
+
+
+/* Function object, NFE (Named Function Expression. */
+// Function is an object type, so it's possible to add/delete properties of a function, assign it to a variable by a reference, etc.
+// Function object contains some useful properties.
+
+// function.name returns a context-name of a function. Context name means that js tries to find the name of a function in case it has no explicit name.
+function myFunctionDeclaration() { }
+const myFunctionExpression = function() { };
+console.log(myFunctionDeclaration.name);        // Output: myFunctionDeclaration
+console.log(myFunctionExpression.name);         // Output: myFunctionExpression
+const classWithFunctions = {
+    innerFunctionDeclaration: function() { },
+    innerFunctionExpression() { }
+};
+console.log(classWithFunctions.innerFunctionDeclaration.name);      // Output: innerFunctionDeclaration
+console.log(classWithFunctions.innerFunctionExpression.name);       // Output: innerFunctionExpression
+// There are few cases it's impossible to define the name of a function - empty string is returned.
+const arrayWithFunction = [function() { }];
+console.log(arrayWithFunction[0].name);                             // Output:  (empty string)
+
+// function.length returns the number of parameters, excluding ...rest parameter.
+console.log((function() {}).length);                // Output: 0
+console.log((function(a) {}).length);               // Output: 1
+console.log((function(a, b) {}).length);            // Output: 2
+console.log((function(a, b, ...c) {}).length);      // Output: 2
+
+// Custom properties could be added to a function. Note: function properties and function local variables are not the same: properties are accessible outside, variables are not.
+function withCounterProperty() {
+    withCounterProperty.count++;
+}
+withCounterProperty.count = 0;
+withCounterProperty();
+withCounterProperty();
+console.log(withCounterProperty.count);         // Output: 2
+
+// Named Function Expression is a variant of a function expression. It differs from common function expression: it's accessible inside itself (recursive call is possible)
+// and not visible outside of the function itself. It's used for recursive calls to handle situations when function declaration is overwritten somewhere in the code.
+let nfe = function namedFunction() {
+    if (false) {
+        namedFunction();        // OK
+        nfe();                  // TypeError: nfe is not a function
+    }
+};
+const nfeCopy = nfe;
+nfe = null;
+nfeCopy();
+// namedFunction();             // ReferenceError: namedFunction is not defined

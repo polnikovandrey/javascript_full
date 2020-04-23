@@ -203,3 +203,100 @@ const nfeCopy = nfe;
 nfe = null;
 nfeCopy();
 // namedFunction();             // ReferenceError: namedFunction is not defined
+
+
+/* 'new Function' syntax. */
+// new Function syntax is used to transform a string function representation into a working function.
+// const func = new Function([arg1, arg2, ...argN], functionBody);
+// Note: arguments could be passed as a single argument of comma separated arguments string.
+new Function('console.log("Function without arguments");')();       // Output: Function without arguments
+new Function('a', 'b', 'console.log(a + b)')(2, 3);                 // Output: 5
+new Function('a, b', 'console.log(a + b);')(2, 3);                  // Output: 5
+// Function, created with a 'new Function' method, has no [[Environment]] (lexical environment) other than global. For security and minification reasons such function
+// has no direct access to both local and global variables, functions, etc. To use one - it should be passed as an argument.
+const globalConstant = 'globalConstant';
+(function() {
+    const localConstant = 'localConstant';
+    // new Function('console.log(localConstant);')();                           // ReferenceError: localConstant is not defined
+    // new Function('console.log(globalConstant);')();                          // ReferenceError: globalConstant is not defined
+    new Function('a', 'console.log(a);')(localConstant);                   // Output: localConstant
+    new Function('b', 'console.log(b);')(globalConstant);                  // Output: globalVariable
+})();
+
+
+/* setTimeout and setInterval */
+// Both functions are being called 'execution planning functions'. Both functions are not part of js specification, but are provided by most execution environments.
+// All browsers and NodeJs provide those functions.
+
+// const timerId = setTimeout(func|code, [delay], [arg1], [arg2], ...);
+// func|code is a function or a code string to be executed.
+// delay - milliseconds.
+// arg1, arg2 - those arguments are passed to the function. Not supported by IE9- .
+function timeOuted() {
+    console.log('timeOuted1');
+}
+setTimeout(timeOuted, 200);                                       // Output: timeOuted1                         After 200ms of waiting.
+function timeOutedWithArguments(a, b) {
+    console.log(`timeOutedWithArguments: ${a}, ${b}`);
+}
+setTimeout(timeOutedWithArguments, 200, 1, 2);          // Output: timeOutedWithArguments: 1, 2        After 200ms of waiting.
+// setTimeout("console.log('timeOuted from string');", 200);             // Output: timeOuted from string               After 200ms of waiting. Not supported by NodeJs.
+
+// timerId has not specification. Browser returns a number a the result of setTimeout() call, NodeJs - an object with additional properties.
+// Anyway timerId could be used as an argument to the clearTimeout() function to stop the timer.
+const timerId = setTimeout(() => console.log('Execution was planned, but canceled.'), 200);        // No output, timer will be canceled.
+clearTimeout(timerId);
+
+// setInterval() function has the same set of arguments as setTimeout(), but it's second is an interval (not delay). Function will be executed repeatedly
+// with the interval specified until clearInterval() function is called.
+let intervalAccumulator = '';
+const intervalId = setInterval(() => intervalAccumulator+='setInterval();', 200);
+setTimeout(() => {
+    clearInterval(intervalId);
+    console.log(intervalAccumulator);               // Output: setInterval();setInterval();setInterval();setInterval();setInterval();
+}, 1100);                           // Note: 4 outputs instead of 5 if 1000 or even 1001 timeout is used.
+
+
+// setInterval() alternative - recursive setTimeout() execution. It's more agile method, because interval could be corrected on each step.
+// It's also more accurate then setInterval(), which does include the function execution time in delay. Recursive setTimeout() does not,
+// so delay starts ticking exactly on recursive setTimeout() call - delay is guaranteed to be >= function's delay argument.
+let delay = 100;
+let recursiveTimerId;
+let recursiveTimeoutAccumulator = '';
+const incrementDelay = () => {
+    if (delay < 1000) {
+        recursiveTimeoutAccumulator += `Delay=${delay};`;
+        delay += delay;
+        recursiveTimerId = setTimeout(incrementDelay, delay);
+    } else {
+        console.log(recursiveTimeoutAccumulator);               // Output: Delay=100;Delay=200;Delay=400;Delay=800;
+    }
+};
+incrementDelay();
+
+// setTimeout() could be supplied with a 0 delay (same as no delay). In that case function execution will start ASAP, but after current code finishes execution.
+setTimeout(() => console.log('ZDA 1'));
+console.log('ZDA 2');                                           // Output: ZDA 2    ZDA 1
+
+// Note: there is a feature for recursive timer calls in a browser js - starting from 5th recursive setTimeout() or setInterval() call
+// the delay is automatically incremented by at least 4ms. NodeJs have no such feature.
+// Both setTimeout() and setInterval() do not guarantee absolutely accurate delay - it may vary.
+// Both setTimeout() and setInterval() functions are executed only after current code execution finishes.
+
+
+/* Decorators, forwarding, call/apply */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

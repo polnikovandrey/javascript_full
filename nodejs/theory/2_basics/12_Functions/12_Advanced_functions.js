@@ -284,7 +284,98 @@ console.log('ZDA 2');                                           // Output: ZDA 2
 // Both setTimeout() and setInterval() functions are executed only after current code execution finishes.
 
 
-/* Decorators, forwarding, call/apply */
+/* Decorators (decorator functions), call forwarding, Function.call(), Function.apply() */
+
+// Function could be used to decorate another function, i.e. to add functionality to another function. For example, could be used for caching.
+// Decorator's advantages:
+// * decorator-function is reusable, could be used with numerous functions.
+// * decorator's logic is distinct, original function don't change and don't become more complex.
+// * decorators could be joined together.
+function heavySlowFunction(argsForHeavy) {
+    // Here goes a heavy calculation.
+    return argsForHeavy;
+}
+function cachingDecorator(heavySlowFunction) {
+    const cache = new Map();
+    return function(argsForHeavy) {
+        if (cache.has(argsForHeavy)) {
+            const cachedResult = cache.get(argsForHeavy);
+            console.log(`From cache: ${cachedResult}`);
+            return cachedResult;
+        } else {
+            const calculationResult = heavySlowFunction(argsForHeavy);
+            cache.set(argsForHeavy, calculationResult);
+            console.log(`Calculated: ${calculationResult}`);
+            return calculationResult;
+        }
+    };
+}
+const decorated = cachingDecorator(heavySlowFunction);
+decorated(1);               // Output: Calculated: 1
+decorated(1);               // Output: From cache: 1
+
+// const result = aFunction.call(context, ...args);
+// Function.call() could be used to explicitly pass (to set or override) a context to a function.
+// Simple example with a function without 'this' context (this=undefined).
+function sayHi(greeting, suffix) {
+    console.log(`${greeting}, ${this.name}${suffix}`);
+}
+const user = { name: 'User' };
+const admin = { name: 'Admin' };
+// sayHi('', '');                       // TypeError: Cannot read property 'name' of undefined          // function has no context
+sayHi.call(user, 'Hi', '.');            // Output: Hi User.
+sayHi.call(admin, 'Hello', '!');        // Output: Hello Admin!
+
+// More complex example, object's method is decorated - this becomes undefined also.
+const greeter = {
+    greeting: 'Howdy',
+    sayHi(firstName, lastName) {
+        console.log(`${this.greeting}, ${firstName} ${lastName}!`);
+    }
+};
+const woGreetingGreeter = greeter.sayHi;
+// woGreetingGreeter(Andrey);                                                   // TypeError: Cannot read property 'greeting' of undefined
+woGreetingGreeter.call({ greeting: 'Good evening' }, 'Andrey', 'Polnikov');     // Output: Good evening, Andrey Polnikov!
+function greeterSayHiDecorator(greeterSayHi) {
+    return function(firstName, lastName) {
+        // return greeterSayHi(name);                                           // TypeError: Cannot read property 'greeting' of undefined
+        return greeterSayHi.call(this, firstName, lastName);                    // Output: Howdy, Danila Polnikov!
+    };
+}
+greeter.sayHi = greeterSayHiDecorator(greeter.sayHi);
+greeter.sayHi('Danila', 'Polnikov');
+
+// const result = aFunction.apply(context, args);
+// Function.apply() differs from Function.call() only by arguments data structure type.
+// Function.call() awaits a list of arguments. Spread operator with iterable object could possibly be used.
+// Function.apply() supposes arguments to be a pseudo-array.
+// It's sometimes convenient to pass the 'arguments' property of a function to the call() or apply() function. Function.apply() is the better choice,
+// because there is no need to use a spread operator and apply() works a little bit faster on most js environments.
+// When 'arguments' property of a function is used with apply() or call() methods - it's called 'call forwarding', because list of arguments stays the same.
+function greeterSayHiForwardingDecorator(greeterSayHi) {
+    return function () {
+        return greeterSayHi.apply(this, arguments);             // Output: Howdy, Volha Polnikova!
+        // return greeterSayHi.call(this, ...arguments);        // Alternative forwarding with call() and spread operator.
+    };
+}
+greeter.sayHi = greeterSayHiForwardingDecorator(greeter.sayHi);
+greeter.sayHi('Volha', 'Polnikova');
+function greeterSayHiForwardingRestDecorator(greeterSayHi) {
+    return function (...rest) {
+        return greeterSayHi.apply(this, rest);                   // Output: Howdy, Dmitry Polnikov!     Alternative way to pass arguments by ...rest argument usage.
+    };
+}
+greeter.sayHi = greeterSayHiForwardingRestDecorator(greeter.sayHi);
+greeter.sayHi('Dmitry', 'Polnikov');
+
+// 'Method borrowing' is a way to use an object's method to work with another object. For example, it could be used to join pseudo-arrays using Array.join() method.
+function withArguments(a, b, c) {
+    // console.log(arguments.join());           // TypeError: arguments.join is not a function          arguments property is a pseudo-array
+    console.log([].join.call(arguments));       // Output: 1,2,3
+}
+withArguments(1, 2, 3);
+
+
 
 
 

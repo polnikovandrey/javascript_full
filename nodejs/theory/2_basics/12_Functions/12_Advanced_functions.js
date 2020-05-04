@@ -376,7 +376,82 @@ function withArguments(a, b, c) {
 withArguments(1, 2, 3);
 
 
+/* Applying 'this' context to a function. */
+// 'this' context of an object is lost, when object's method is used as a callback of a function (separately from the owning object).
+const aUser = {
+    name: 'Vasya',
+    say(suffix) {
+        console.log(`${suffix}, ${this.name}`);
+    },
+    sayHi() {
+        console.log(`Hi, ${this.name}`);
+    }
+};
+setTimeout(aUser.sayHi, 100);                       // Output: Hi, undefined
+// Note: in a browser setTimeout() function callback's 'this' value is a window object, in NodeJs - 'this' is a timer object, in other environments 'this' is undefined.
+// There are 2 methods to solve the problem of a lost context:
 
+// 1. wrap a method call in an anonymous function (use a closure).
+setTimeout(function() {
+    aUser.sayHi();
+}, 100);                                            // Output: Hi, Petya
+setTimeout(() => aUser.sayHi(), 100);       // Output: Hi, Petya
+aUser.name = 'Petya';       // The disadvantage is the fact that the context could be changed before the function call by a timer. Next method solves this problem.
+
+
+// 2. bind a 'this' context with a function's bind() method.
+// let boundFunction = aFunction.bind(context);             // boundFunction() call means call a aFunction() method with 'this' a particular context.
+function logNameFunction(suffix) {
+    console.log(`${suffix} ${this.name}`);
+}
+const logNameWithContextFunction = logNameFunction.bind(aUser);
+logNameWithContextFunction('The name is');                 // Output: The name is Petya
+const sayHiFunctionWoContext = aUser.sayHi;
+const sayHiFunctionWithBoundContext = aUser.sayHi.bind(aUser);
+const sayFunctionWithBoundContext = aUser.say.bind(aUser);
+// sayHiFunctionWoContext();                                                    // TypeError: Cannot read property 'name' of undefined
+setTimeout(sayHiFunctionWoContext, 100);                                // Output: Hi, undefined
+sayHiFunctionWithBoundContext();                                                // Output: Hi, Petya
+setTimeout(sayHiFunctionWithBoundContext, 100);                         // Output: Hi, Petya
+sayFunctionWithBoundContext('Hello');                                          // Output: Hello, Petya
+
+// There is a convenient method for a mass-binding of an object's methods - bindAll(). Could be used with an object, whose methods are often used as callbacks.
+for (let key in aUser) {
+    if (typeof aUser[key] === 'function') {
+        aUser[key] = aUser[key].bind(aUser);
+    }
+}
+
+
+// function's bind() method could also be used to bind arguments. This could be used for 'partial application' - binding a part of function's arguments to constant values.
+// const aBoundFunction = aFunction.bind(context, [arg1], [arg2], ...);
+function multiply(a, b) {
+    return console.log(a * b);
+}
+const multiplyByTwo = multiply.bind(null, 2);
+const multiplyByThree = multiply.bind(null, 3);
+multiplyByTwo(1);                                       // Output: 2
+multiplyByThree(1);                                     // Output: 3
+multiplyByTwo(2);                                       // Output: 4
+multiplyByThree(2);                                     // Output: 6
+multiplyByTwo(3);                                       // Output: 6
+multiplyByThree(3);                                     // Output: 9
+
+// Note that a context object ('this') is required by bind() method and last example used null as a context value.
+// If original 'this' context should be used by a bound function - it could be achieved with a the help of a helper function.
+function partial(func, ...argBounds) {          // There is lodash's _.partial() same implementation.
+    return function(...args) {
+        return func.call(this, ...argBounds, ...args);
+    };
+}
+const speaker = {
+    name: 'Alphonso',
+    say(time, phrase) {
+        console.log(`[${time}] ${this.name}: ${phrase}`);
+    }
+};
+speaker.sayNow = partial(speaker.say, new Date().getHours() + ':' + new Date().getMinutes());           // The speaker object becomes 'this' context.
+speaker.sayNow('Hello');                               // Output: [22:12] Alphonso: Hello
 
 
 

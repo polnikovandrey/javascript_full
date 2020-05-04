@@ -396,8 +396,8 @@ setTimeout(function() {
     aUser.sayHi();
 }, 100);                                            // Output: Hi, Petya
 setTimeout(() => aUser.sayHi(), 100);       // Output: Hi, Petya
-aUser.name = 'Petya';       // The disadvantage is the fact that the context could be changed before the function call by a timer. Next method solves this problem.
-
+// The disadvantage of this method is the fact that the context object 'aUser' could be changed before the function call by a timer.
+// If context should be fixed - next method could be used.
 
 // 2. bind a 'this' context with a function's bind() method.
 // let boundFunction = aFunction.bind(context);             // boundFunction() call means call a aFunction() method with 'this' a particular context.
@@ -453,7 +453,21 @@ const speaker = {
 speaker.sayNow = partial(speaker.say, new Date().getHours() + ':' + new Date().getMinutes());           // The speaker object becomes 'this' context.
 speaker.sayNow('Hello');                               // Output: [22:12] Alphonso: Hello
 
+// bind() methods creates an `exotic object` with a bound context and arguments, which couldn't be changed. bind() call on such object has no effect.
+function tryToBindTwice(suffix) {
+    console.log(`${this.prefix} and ${suffix}`);
+}
+const boundTwice = tryToBindTwice.bind({ prefix: 'Shadows' }, 'dust').bind({ prefix: 'Peace' }, 'glory');
+boundTwice();               // Output: Shadows and dust
 
+// bind() method creates an another `exotic object`, which doesn't have original function's properties.
+function withAProperty() {
+    console.log(this.value);
+}
+withAProperty.aProperty = 'will be lost';
+const withoutAProperty = withAProperty.bind({ value: 'aValue' });
+withoutAProperty();                             // Output: aValue
+console.log(withoutAProperty.aProperty);        // Output: undefined
 
 
 

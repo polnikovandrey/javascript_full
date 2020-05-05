@@ -521,14 +521,3 @@ function deferWithCommonFunction(func, ms) {
 }
 const greetDeferred2 = deferWithCommonFunction(greet, 100);
 greetDeferred2('Bill');                     // Output: Hello, Bill              After 100ms of waiting
-
-
-
-
-
-
-
-
-
-
-

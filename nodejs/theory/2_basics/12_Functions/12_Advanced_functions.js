@@ -470,6 +470,58 @@ withoutAProperty();                             // Output: aValue
 console.log(withoutAProperty.aProperty);        // Output: undefined
 
 
+/* Advanced arrow functions. */
+// The important feature of arrow functions - the absence of it's own 'this' context. Arrow function's 'this' context always points to the outer 'this' context.
+const group = {
+    title: 'A',
+    students: [ 'Bill', 'John', 'Steve' ],
+    showListFunction() {                                 // function callback is used
+        let output = '';
+        this.students.forEach(function(student) {
+            output += `${this.title}: ${student} `;       // foreach() supplies function with undefined 'this' context - there will be an error while executing this method.
+        });
+        console.log(`[${output}]`);
+    },
+    showListArrowFunction() {                           // arrow function callback is used
+        let output = '';
+        this.students.forEach(student => {
+            output += `${this.title}: ${student} `;       // arrow function has no own 'this' context, 'this' is the same object as of showListArrowFunction() method call
+        });
+        console.log(`[${output}]`);
+    }
+};
+// group.showListFunction();                             // TypeError: Cannot read property 'title' of undefined
+group.showListArrowFunction();                           // [A: Bill A: John A: Steve ]
+
+// As soon as arrow function have no own 'this' context - they couldn't be used with a 'new' operator.
+// There is a difference between a bound function (function.bind() method) and arrow function. Bound function creates a linked version of an original function.
+// Arrow function doesn't bind anything, it just have no 'this' context. When accessing 'this' object from within arrow function - it's taken from the outer
+// lexical context (like a common variable).
+
+// Another important feature of arrow functions - the absence of own 'arguments' property. Like 'this' object - 'arguments' are taken from the outer lexical context.
+// This feature allows convenient usage of arrow functions as decorators (wrappers).
+function deferWithArrowFunction(func, ms) {      // deferWithArrowFunction() returns a wrapper function, which defers the 'func' execution.
+    return function() {
+        setTimeout(() => func.apply(this, arguments), ms);      // Note 'this' usage - it's a wrapper function's 'this' context object.
+    };
+}
+function greet(who) {
+    console.log(`Hello, ${who}`);
+}
+const greetDeferred = deferWithArrowFunction(greet, 100);
+greetDeferred('John');                          // Output: Hello, John              After 100ms of waiting
+// A common (non-arrow) function could be used also, but arrow function is more convenient.
+function deferWithCommonFunction(func, ms) {
+    return function(...args) {                  // args argument is used to pass into setTimeout() callback function.
+        const ctx = this;                       // ctx constant is used to store 'this' context and pass into setTimeout() callback function.
+        setTimeout(function() {
+            return func.apply(ctx, args);
+        }, ms);
+    };
+}
+const greetDeferred2 = deferWithCommonFunction(greet, 100);
+greetDeferred2('Bill');                     // Output: Hello, Bill              After 100ms of waiting
+
 
 
 

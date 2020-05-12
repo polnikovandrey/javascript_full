@@ -98,4 +98,4 @@ const withArray2 = {
 };
 withArray1.writeToArray(1);
 console.log(withArray2.arr);                    // Output: [ 1 ]
-
+// It's recommended for inheriting object to have it's own prototype's properties analogs to prevent such unintuitive behavior (both withArray1 and withArray2 have own 'arr' key).

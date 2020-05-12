@@ -70,8 +70,6 @@ inheriting.activate();
 console.log(inheriting.active);                 // Output: true
 console.log(base.active);                       // Output: false
 
-// Object.keys(), Object.values() returns object's own keys/values only (including keys/values, created by using a prototype methods).
-console.log(Object.keys(inheriting));           // Output: [ 'active' ]
 // for..in cycles through both own and prototype keys. Own properties could be filtered by using obj.hasOwnProperty(key) method.
 let output = '';
 for (let key in inheriting) {
@@ -82,4 +80,22 @@ console.log(output);                            // Output: [active] key is own =
 // 'inheriting.hasOwnProperty(key);' could be used - it's an Object.prototype's method. for..in cycle doesn't cycle through Object.prototype's properties/methods
 // because all of them have false 'enumerable' flag value.
 
+// Object.keys(), Object.values() and alike methods return object's own keys/values only (including own keys/values, already created by using a prototype methods).
+console.log(Object.keys(inheriting));           // Output: [ 'active' ]
+
+// Note: method writeToArray doesn't rewrite arr property, it uses it to push a value inside. So arr is the same both for withArray, withArray1 and withArray2.
+const withArray = {
+    arr: [],
+    writeToArray(value) {
+        this.arr.push(value);
+    }
+};
+const withArray1 = {
+    __proto__: withArray
+};
+const withArray2 = {
+    __proto__: withArray
+};
+withArray1.writeToArray(1);
+console.log(withArray2.arr);                    // Output: [ 1 ]
 

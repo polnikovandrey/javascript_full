@@ -53,3 +53,20 @@ E.prototype = { constructor: E, someProperty: 'someValue' };            // Overw
 console.log(new E().constructor);                   // Output: [Function: E]
 E.prototype.anotherProperty = 'anotherValue';                           // Modifying a 'prototype' value, retaining a 'constructor' property.
 console.log(new E().constructor);                   // Output: [Function: E]
+
+
+function F(anArg) {
+    this.anArg = anArg;
+}
+
+F.prototype = { aProperty: 'aValue' };
+const fObject = new F('someArg');
+delete fObject.aProperty;                           // 'delete' operator deletes only object's own properties, 'aProperty' belongs to F's prototype's object.
+console.log(fObject.aProperty);                     // Output: aValue
+
+F.prototype = { };
+const fObject1 = new F('aValue');
+// When looking for a 'constructor' property through fObject2's prototypes chain js compiler finds it in an Object's prototype.
+// Object's constructor ignores all arguments, so fObject2's constructor argument will be ignored also.
+const fObject2 = fObject1.constructor('aValue');
+console.log(fObject2.anArg);                        // Output: undefined

@@ -44,20 +44,4 @@ const fetchPromise = promise.then(() => nodeFetch('https://reqres.in/api/users/2
 const jsonPromise = fetchPromise.then(response => {
     return response.json();
 });
-const logJsonPromise = jsonPromise.then(json => console.log(json));
-
-logJsonPromise
-    .then(fromFinallyPromise => {
-        try {
-            console.log(fromFinallyPromise);
-            throw new Error();
-        } finally {
-        }
-    })
-    .catch(error => {
-        console.log('error');
-        return new Promise(2);          // Note: catch could also return a value or a Promise.
-    })
-    .catch(error => {
-        console.log('error1');
-    });
+jsonPromise.then(json => console.log(json));        // Output: { data: ... }

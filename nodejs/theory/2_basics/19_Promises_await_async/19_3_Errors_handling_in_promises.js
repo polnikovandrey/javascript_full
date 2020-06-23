@@ -36,7 +36,7 @@ new Promise((resolve, reject) => reject(new Error('4')))
 
 new Promise(resolve => {
     setTimeout(() => {
-        throw new Error('5');
+        // throw new Error('5');                                // Commented out to prevent console output of an error.
     }, 100);
-}).catch(error => console.log('Error 5 will not be caught'));   // Error will not be caught, because seTimeout() throws the error after .catch() execution.
+}).catch(error => console.log('Error 5 will not be caught'));   // Error will not be caught, because seTimeout() throws the error after the .catch() execution.
 

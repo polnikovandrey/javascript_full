@@ -47,7 +47,8 @@ const promise4 = promise3
     );
 
 
-// Promise.race() accepts an array or iterable of Promises or values of any type, waits for any promise to fulfill or reject and return the result of that quickest promise.
+// Promise.race() accepts an array or iterable of Promises or values of any type, waits for any promise to fulfill or reject
+// and returns immediately the result of that quickest promise.
 const promise5 = promise4
     .then(Promise.race([
             new Promise(resolve => setTimeout(() => resolve(11), 300)),
@@ -69,6 +70,3 @@ const promise7 = new Promise(resolve => resolve(1));
 const promise8 = Promise.resolve(1);                                            // Same as previous line.
 const promise9 = new Promise((resolve, reject) => reject(new Error()));
 const promise10 = Promise.reject(new Error());                                        // Same as previous line.
-
-
-

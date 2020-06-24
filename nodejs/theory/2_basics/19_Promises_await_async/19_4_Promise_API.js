@@ -67,6 +67,6 @@ const promise6 = promise5
 
 // Promise.resolve() and Promise.reject() are used to create already fulfilled/rejected Promise.
 const promise7 = new Promise(resolve => resolve(1));
-const promise8 = Promise.resolve(1);                                            // Same as previous line.
-const promise9 = new Promise((resolve, reject) => reject(new Error()));
-const promise10 = Promise.reject(new Error());                                        // Same as previous line.
+const promise8 = Promise.resolve(1);                                                                    // Same as previous line.
+const promise9 = new Promise((resolve, reject) => reject(new Error())).catch(reason => { });
+const promise10 = Promise.reject(new Error()).catch(reason => { });                                          // Same as previous line.

@@ -57,7 +57,9 @@ console.log([...range]);                // [ 1, 2, 3, 4, 5 ]
 // [yield* someGenerator] delegates execution to the [someGenerator] - iterates [someGenerator] and returns it's output.
 // yield* syntax is quite effective - it doesn't use additional memory to store intermediate results.
 function* generateFromTo(start, end) {
-    for (let i = start; i <= end; i++) yield i;
+    for (let i = start; i <= end; i++) {
+        yield i;
+    }
 }
 function* generateCodes() {
     yield* generateFromTo(48, 57);      // Chars 0..9               Same as:     'for (let i = 48; i <= 57; i++) yield i;'

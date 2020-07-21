@@ -29,7 +29,7 @@
     "browser": true,
     "devel": true,
     "jquery": true,
-    "esversion": 8,
+    "esversion": 9,
     "node": true
   }
 }

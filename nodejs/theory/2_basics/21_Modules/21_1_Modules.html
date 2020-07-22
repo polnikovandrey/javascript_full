@@ -1,0 +1,59 @@
+<!doctype html>
+<body>
+    <script>
+        // Module-scripts (external or internal) are being executed in deferred mode in browsers. So a common non-module scripts are being executed first (before module-scripts).
+        // As soon as module-scripts are being executed in the deferred mode - they don't block the html output and wait for full html output before execution.
+        // The order of execution of module-scripts is being respected (execution by declaration order).
+        // Module-scripts always see fully loaded html, including html below the script itself.
+    </script>
+
+    <script type="module">
+        // A module's 'import.meta' object contains an info about the current module (link to the script and link to the current web-page in a browser).
+        console.log(import.meta);       // Object   url: "http://localhost:63342/javascript_full/nodejs/theory/2_basics/21_Modules/1.html?_ijt=91o0g6o31ksb6s01mtp5nsr6oj"
+    </script>
+
+    <script type="module">
+        // 'this' is not defined for a top level code of a module.
+        console.log(this);              // undefined
+    </script>
+
+    <script>
+        // 'this' value for the same code level of a common script is a global object.
+        console.log(this);              // Window { ... }
+    </script>
+
+    <script async type="module">
+        // A built-in module-script could be defined 'async' - such script doesn't wait html and scripts other then imported to load.
+        import {logTheSameObjectForAllImportersValue} from './exporter.js';
+        logTheSameObjectForAllImportersValue();
+    </script>
+
+    <script type="module" src="exporter.js">
+        // External module-script, imported multiple times, is being executed only once.
+    </script>
+    <script type="module" src="exporter.js"></script>
+
+    <script type="module" src="http://another-site.com/their.js">
+        // Output : Access to script at 'http://another-site.com/their.js' from origin 'http://localhost:63342'
+        //          has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+
+        // If an external module-script is located at other origin - that origin should provide a 'Access-Control-Allow-Origin' header for that script to be used.
+    </script>
+
+    <script type="module">
+        // Browser's 'import' directive should contain a relative or an absolute script location. Imports without location are being called 'bare imports' and are
+        // denied in a browser scripts (but could be used in NodeJs).
+    </script>
+
+    <script nomodule>
+        // <script nomodule>...<//script> construction should be used to implement a reserved code for older browsers, which do not support module-scripts.
+    </script>
+
+    <script>
+        // Practically, browser modules are seldom being used as is. Compilers such as Webpack are used to compile modules (module-scripts and possibly css/html modules)
+        // into a working code. Compiler usually packs all modules into a single (or multiple - that could be configured) compiled .js file.
+        // Compiler usually applies additional optimizations: cleans unreachable code, removes unused exports (tree-shaking), removes 'console' and 'debugger'
+        // development-phase operators, uses Babel to transform a code to a former standard, applies minification and so on.
+        // The resulting (usually single) .js file is being imported as <script src="result.js"><//script>
+    </script>
+</body>

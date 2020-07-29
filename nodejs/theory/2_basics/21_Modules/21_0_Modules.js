@@ -10,13 +10,13 @@ import {sayHi} from './sayHi.js';           // See sayHi.js
 console.log(sayHi);                         // Output: [Function: sayHi]
 sayHi('Ivan');                         // Output: Hi, Ivan!
 
-// To use 'import' directive inside a browser script - type of the script should be 'module':
+// To use 'import' directive inside a browser script - the type of the script should be a 'module':
 // <script type="module">
 //      ...
 //      import {scriptName} from 'path/fileName.js';
 //      ...
 // </script>
-// Browser loads and imports the module, so as modules imported by that module, before the script execution.
+// Browser loads and imports the module before the script execution, as like as modules, imported by that module.
 // A module could also be imported as:
 // <script type="module" src='path/fileName.js'></script>
 
@@ -32,8 +32,8 @@ console.log(user1.name);                // Output: Ivan
 // A module's script is being executed only once when imported. In case of multiple imports of the very same module - that module's script is being executed only
 // once, then imported into all importers.
 import './multipleUsagesModule.js';     // Output: multipleUsagesModule.js is being executed
-import './multipleUsagesModule.js';     // No output, module has been executed already.
-// So a module's task is module initialization only. A module's part (a property or a function) should be exported/imported to be executed multiple times.
+import './multipleUsagesModule.js';     // No output, module was executed already.
+// So an import's task is a module initialization only. A module's part (a property or a function) should be exported/imported to be executed multiple times.
 
 
 // As soon as module's script is being executed only once - an exported property is the same for each importer. Changes to that property are visible to all

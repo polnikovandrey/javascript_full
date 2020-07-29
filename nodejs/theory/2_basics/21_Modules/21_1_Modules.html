@@ -25,7 +25,7 @@
     <script async type="module">
         // A built-in module-script could be defined 'async' - such script doesn't wait html and scripts other then imported to load.
         import {logTheSameObjectForAllImportersValue} from './exporter.js';
-        logTheSameObjectForAllImportersValue();
+        logTheSameObjectForAllImportersValue();         <!-- Output: 1 -->
     </script>
 
     <script type="module" src="exporter.js">
@@ -37,7 +37,7 @@
         // Output : Access to script at 'http://another-site.com/their.js' from origin 'http://localhost:63342'
         //          has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
 
-        // If an external module-script is located at other origin - that origin should provide a 'Access-Control-Allow-Origin' header for that script to be used.
+        // If an external module-script is located at another origin - that origin should provide a 'Access-Control-Allow-Origin' header for that script to be used.
     </script>
 
     <script type="module">
@@ -50,7 +50,7 @@
     </script>
 
     <script>
-        // Practically, browser modules are seldom being used as is. Compilers such as Webpack are used to compile modules (module-scripts and possibly css/html modules)
+        // Practically, browser modules are rarely being used as is. Compilers such as Webpack are used to compile modules (module-scripts and possibly css/html modules)
         // into a working code. Compiler usually packs all modules into a single (or multiple - that could be configured) compiled .js file.
         // Compiler usually applies additional optimizations: cleans unreachable code, removes unused exports (tree-shaking), removes 'console' and 'debugger'
         // development-phase operators, uses Babel to transform a code to a former standard, applies minification and so on.

@@ -18,7 +18,7 @@ const secondModulePromise = firstModulePromise
         say1();                                         // Output: Hi
         say2();                                         // Output: Bye
     });
-const thirdModulePromise = secondModulePromise
+secondModulePromise
     .then(async () => {
         const moduleObject = await import('./withUnnamedDefaultObject.js');                                     // jshint ignore: line
         const unnamedDefaultModuleMethod = moduleObject.default;

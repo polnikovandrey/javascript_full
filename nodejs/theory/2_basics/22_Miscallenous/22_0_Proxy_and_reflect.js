@@ -13,20 +13,21 @@ for (let key in proxy) {        // Output: test                 Iteration works 
     console.log(key);
 }
 /*
-A trap is a method with a specific name. That name corresponds to the action, which is going to be intercepted:
-- get                       property reading
-- set                       property writing
-- has                       using the 'in' operator
-- deleteProperty            using the 'delete' operator (deleting a property)
-- apply                     function execution
-- construct                 using the 'new' operator
-- getPrototypeOf            using the 'Object.getPrototypeOf'
-- setPrototypeOf            using the 'Object.setPrototypeOf'
-- isExtensible              using the 'Object.isExtensible'
-- preventExtensions         using the 'Object.preventExtensions'
-- defineProperty            using the 'Object.defineProperty'/'Object.defineProperties'
-- getOwnPropertyDescriptor  using the 'Object.getOwnPropertyDescriptor' (for...in, Object.keys/values/entries)
-- ownKeys                   using the 'Object.getOwnPropertyNames'/'Object.getOwnPropertySymbols' (for...in, Object.keys/values/entries)
+A trap is a method with a specific name. That name corresponds to the inner method name and to the action, which is going to be intercepted:
+- get                       [[Get]]                 property reading
+- set                       [[Set]]                 property writing
+- has                       [[HasProperty]]         using the 'in' operator
+- deleteProperty            [[Delete]]              using the 'delete' operator (deleting a property)
+- apply                     [[Call]]                function execution
+- construct                 [[Construct]]           using the 'new' operator
+- getPrototypeOf            [[GetPrototypeOf]]      using the 'Object.getPrototypeOf'
+- setPrototypeOf            [[SetPrototypeOf]]      using the 'Object.setPrototypeOf'
+- isExtensible              [[IsExtensible]]        using the 'Object.isExtensible'
+- preventExtensions         [[PreventExtensions]]   using the 'Object.preventExtensions'
+- defineProperty            [[DefineOwnProperty]]   using the 'Object.defineProperty'/'Object.defineProperties'
+- getOwnPropertyDescriptor  [[GetOwnProperty]]      using the 'Object.getOwnPropertyDescriptor' (for...in, Object.keys/values/entries)
+- ownKeys                   [[OwnPropertyKeys]]     using the 'Object.getOwnPropertyNames'/'Object.getOwnPropertySymbols' (for...in, Object.keys/values/entries)
+Inner methods couldn't be accessed directly (except Reflect - see below).
 All those traps should follow the spec https://tc39.es/ecma262/#sec-proxy-object-internal-methods-and-internal-slots to be used.
 Different traps have different limitations according to the spec:
 - set/delete traps should return true if the value was actually written/deleted, false otherwise
@@ -228,4 +229,60 @@ console.log(wrappedWithApplySayHi.length);              // Output: 1            
 wrappedWithApplySayHi('John');                          // Output: Hi, John             Wrapper works.
 
 
-// Reflect...
+// Reflect is a built-in object used to simplify Proxy creation.
+// Reflect has access to the inner methods like [[Get]], [[Set]] and others. Reflect object's methods are minimal wrappers around those inner methods.
+// Here comes a table of examples of the Reflect usage (operation - Reflect method - Inner method):
+// obj[prop]                Reflect.get(obj, prop)                  [[Get]]
+// obj[prop] = value        Reflect.set(obj, prop, value)           [[Set]]
+// delete obj[prop]         Reflect.deleteProperty(obj, prop)       [[Delete]]
+// new F(value)             Reflect.construct(F, value)             [[Construct]]
+// ...
+// Actually, every single inner method, captured by a Proxy, has according Reflect object's method with the same name and arguments.
+// That is why a Reflect could be used to forward the operation to the original object, there is no need to implement operation explicitly:
+let user3 = {
+    name: 'John'
+};
+user3 = new Proxy(user3, {
+    get(target, p, receiver) {
+        console.log(`GET ${p}`);
+        return Reflect.get(target, p,receiver);
+    },
+    set(target, p, value, receiver) {
+        console.log(`SET ${p}`);
+        return Reflect.set(target, p, value, receiver);
+    }
+});
+const aName = user3.name;           // Output:  GET name
+user3.name = 'Bill';                // Output:  SET name
+
+// Reflect could be used to implement a correct Proxy access to a getter in case of prototyping.
+const user4 = {
+    _name: 'John',
+    get name() {
+        return this._name;
+    }
+};
+const user4ProxyWithoutPrototypeGetterSupport = new Proxy(user4, {
+    get(target, p, receiver) {
+        return target[p];
+    }
+});
+const notValidAdmin = {
+    __proto__: user4ProxyWithoutPrototypeGetterSupport,
+    _name: 'Admin'
+};
+console.log(notValidAdmin.name);            // Output: John                 Not Admin! 'this' context is not as expected, it's a user4 object.
+const user4ProxyWithPrototypeGetterSupport = new Proxy(user4, {
+    get(target, p, receiver) {
+        return Reflect.get(target, p, receiver);            // receiver is used to pass a correct context to the original function.
+        // return Reflect.get(...arguments);                // alternative shortcut usage - arguments of a Proxy method and according Reflect method always match.
+    }
+});
+const validAdmin = {
+    __proto__: user4ProxyWithPrototypeGetterSupport,
+    _name: 'Admin'
+};
+console.log(validAdmin.name);               // Output: Admin
+
+
+// Proxy limitations...

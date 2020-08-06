@@ -34,7 +34,7 @@ Different traps have different limitations according to the spec:
 - ... see the spec
  */
 
-// It's highly recommended to overwrite original (wrapped) object with a Proxy everywhere to avoid confusion while coding.
+// It's highly recommended to overwrite the original (wrapped) object with a Proxy everywhere to avoid a confusion while coding.
 
 // A 'get' trap syntax: get(target, property, receiver). Target - wrapped object, property - a property name, receiver - the 'this' value of a getter (if exists) of the property.
 // A 'get' trap use case - implementation of the default value of an array.
@@ -49,6 +49,7 @@ numbers = new Proxy(numbers, {
     }
 });
 console.log(numbers[123]);                  // Output: 0
+
 
 // Another 'get' trap use case - returning the original word from dictionary if there is no corresponding entry.
 let dictionary = {
@@ -65,6 +66,7 @@ dictionary = new Proxy(dictionary, {
     }
 });
 console.log(dictionary['Proxy']);           // Output: Proxy
+
 
 // A 'set' trap syntax: set(target, property, value, receiver).
 // A 'set' trap use case - validation of values being added to the array - NaNs are being skipped with an error.
@@ -87,4 +89,143 @@ try {
     console.log(numbersOnly);               // Output: []
 }
 
-// A 'ownKeys' and 'getOwnPropertyDescriptor' traps...
+
+// Iterating by [ownKeys] and [getOwnPropertyDescriptor] traps.
+// Most methods, used to iterate over an object's properties (Object.keys, for..in, ...), use inner method [[OwnPropertyKeys]] under the hood.
+// Those iteration methods have differences, but every one of them starts with the list returned by [[OwnPropertyKeys]]. Differences:
+// * Object.getOwnPropertyNames() - returns non-Symbol keys
+// * Object.getOwnPropertySymbols() - returns Symbol keys
+// * Object.keys()/.values() - return non-Symbol keys/values, having enumerable=true flag in theirs descriptors
+// * for..in - cycles through non-Symbol keys, having enumerable=true flag, and prototype keys
+// [ownKeys] trap intercepts that inner method.
+// An example to skip keys, starting with "_" symbol, while iterating the object's keys with for..in, Object.keys() and Object.values():
+let user = {
+    name: 'John',
+    age: 30,
+    _password: '***'
+};
+user = new Proxy(user, {
+    ownKeys(target) {
+        return Object.keys(target).filter(key => !key.startsWith('_'));
+    }
+});
+for (let key in user) {
+    console.log(key);                           // Output: name  /n   age
+}
+console.log(Object.keys(user));                 // Output: [ 'name', 'age' ]
+console.log(Object.values(user));               // Output: [ 'John', 30 ]
+// Custom keys, returned by [ownKeys], are not visible to Object.keys()/.values() and for..in, because the are not enumerable by default.
+// To overcome that limitation the [getOwnPropertyDescriptor] trap could be used.
+// An example to override keys by [ownKeys] property with the help of [getOwnPropertyDescriptor] property.
+let user1 = { };
+user1 = new Proxy(user1, {
+    ownKeys(target) {
+        return ['a', 'b', 'c'];
+    },
+    getOwnPropertyDescriptor(target, p) {
+        return {
+            enumerable: true,
+            configurable: true
+        };
+    }
+});
+console.log(Object.keys(user1));                // Output: [ 'a', 'b', 'c' ]
+
+
+// An example of [get], [set], [deleteProperty] and [ownKeys] traps usage to make a field private (to limit access to those fields from outside).
+let user2 = {
+    name: 'John',
+    _password: '***',
+    checkPassword(value) {
+        return value === this._password;
+    }
+};
+user2 = new Proxy(user2, {
+    get(target, p, receiver) {
+        if (p.startsWith('_')) {
+            throw new Error('Access denied');
+        } else {
+            // That check is needed for user2.checkPassword() to work, otherwise inner checkPassword() logic wouldn't have access to the '_password' field too.
+            let value = target[p];
+            return typeof value === 'function' ? value.bind(target) : value;
+        }
+    },
+    set(target, p, value, receiver) {
+        if (p.startsWith('_')) {
+            throw new Error('Access denied');
+        } else {
+            target[p] = value;
+            return true;
+        }
+    },
+    deleteProperty(target, p) {
+        if (p.startsWith('_')) {
+            throw new Error('Access denied');
+        } else {
+            delete target[p];
+            return true;
+        }
+    },
+    ownKeys(target) {
+        return Object.keys(target).filter(key => !key.startsWith('_'));
+    }
+});
+try {
+    console.log(user2._password);
+} catch(error) {
+    console.log(error.message);                     // Output: Access denied
+}
+try {
+    user2._password = 'asd';
+} catch(error) {
+    console.log(error.message);                     // Output: Access denied
+}
+try {
+    delete user2._password;
+} catch(error) {
+    console.log(error.message);                     // Output: Access denied
+}
+console.log(Object.keys(user2));                    // Output: [ 'name', 'checkPassword' ]
+
+
+// An example of [has] trap to implement a value in a range check.
+let range = {
+    start: 1,
+    end: 10
+};
+range = new Proxy(range, {
+    has(target, p) {
+        return p >= target.start && p <= target.end;
+    }
+});
+console.log(5 in range);                            // Output: true
+console.log(50 in range);                           // Output: false
+
+// An example of [apply] trap usage to capture the proxy-function call. The function-implementation of a delay-function-wrapper:
+function delay(originalFunction, delayMs) {
+    return function() {
+        setTimeout(() => originalFunction.apply(this, arguments), delayMs);
+    };
+}
+// That wrapper-function work, but a user has no access to the originalFunction's properties through the wrapper:
+function sayHi(user) {
+    console.log(`Hi, ${user}`);
+}
+console.log(sayHi.length);                              // Output: 1                    Number of sayHi()'s arguments.
+const wrappedSayHi = delay(sayHi, 1);
+console.log(wrappedSayHi.length);                       // Output: 0                    Number of wrappedSayHi()'s arguments.
+wrappedSayHi('John');                                   // Output: Hi, John             Wrapper works.
+// To retain access to the originalFunction's properties the [apply] trap could be used.
+function delayWithApply(originalFunction, delayMs) {
+    return new Proxy(originalFunction, {
+        apply(target, thisArg, argArray) {
+            setTimeout(() => target.apply(thisArg, argArray), delayMs);
+        }
+    });
+}
+const wrappedWithApplySayHi = delayWithApply(sayHi, 1);
+console.log(wrappedWithApplySayHi.length);              // Output: 1                    All types of access to the Proxy are forwarded to the original function.
+wrappedWithApplySayHi('John');                          // Output: Hi, John             Wrapper works.
+
+
+// Reflect...

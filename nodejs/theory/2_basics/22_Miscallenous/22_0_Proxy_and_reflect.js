@@ -285,4 +285,24 @@ const validAdmin = {
 console.log(validAdmin.name);               // Output: Admin
 
 
-// Proxy limitations...
+    // Proxy limitations.
+
+// Built-in objects: built-in slots.
+// Many built-in objects (Map, Set, Date, Promise, ...) use built-in clots to store those data. Built-in slots are "inner properties" like Map's [[MapData]], which
+// are visible only to those objects and which are accessed directly by such object's built-in methods, bypassing [[Get]]/[[Set]] methods.
+// That makes impossible to intercept those methods by the regular proxying.
+const map1 = new Map();
+// const unworkableProxy = new Proxy(map1);             // TypeError: Cannot create proxy with a non-object as target or handler
+const unworkableProxy = new Proxy(map1, {});
+// unworkableProxy.set('test', 1);                      // TypeError: Method Map.prototype.set called on incompatible receiver [object Object]
+
+// To make interception possible - the special technic should be used.
+const workableProxy = new Proxy(map1, {
+    get(target, p, receiver) {
+        const value = Reflect.get(...arguments);
+        return typeof  value === 'function' ? value.bind(target) : value;
+    }
+});
+workableProxy.set('test', 1);
+console.log(workableProxy.get('test'));                 // Output: 1
+// Array object is an exception - it doesn't use slots. There is no need to provide a special handler to proxy an object of the Array type.

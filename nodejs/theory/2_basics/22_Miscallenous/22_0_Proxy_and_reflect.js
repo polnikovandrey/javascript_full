@@ -292,7 +292,6 @@ console.log(validAdmin.name);               // Output: Admin
 // are visible only to those objects and which are accessed directly by such object's built-in methods, bypassing [[Get]]/[[Set]] methods.
 // That makes impossible to intercept those methods by the regular proxying.
 const map1 = new Map();
-// const unworkableProxy = new Proxy(map1);             // TypeError: Cannot create proxy with a non-object as target or handler
 const unworkableProxy = new Proxy(map1, {});
 // unworkableProxy.set('test', 1);                      // TypeError: Method Map.prototype.set called on incompatible receiver [object Object]
 
@@ -300,9 +299,48 @@ const unworkableProxy = new Proxy(map1, {});
 const workableProxy = new Proxy(map1, {
     get(target, p, receiver) {
         const value = Reflect.get(...arguments);
-        return typeof  value === 'function' ? value.bind(target) : value;
+        return typeof value === 'function' ? value.bind(target) : value;
     }
 });
 workableProxy.set('test', 1);
 console.log(workableProxy.get('test'));                 // Output: 1
 // Array object is an exception - it doesn't use slots. There is no need to provide a special handler to proxy an object of the Array type.
+
+// Private fields.
+// The same problem is actual for private fields, which are being stored in built-in slots (js doesn't use [[Get]]/[[Set]] methods to access them).
+class PrivateUser {
+    #name = 'Guest';            // jshint ignore: line
+
+    getName() {
+        return this.#name;      // jshint ignore: line
+    }
+}
+const privateUser = new PrivateUser();
+const unworkablePrivateUserProxy = new Proxy(privateUser, {});
+// console.log(unworkablePrivateUserProxy.getName());           // TypeError: Cannot read private member #name from an object whose class did not declare it
+// To solve that problem the correct context should be provided to the Proxy's 'get' trap.
+const workablePrivateUserProxy = new Proxy(privateUser, {
+    get(target, p, receiver) {
+        const value = Reflect.get(...arguments);
+        return typeof value === 'function' ? value.bind(target) : value;
+    }
+});
+console.log(workablePrivateUserProxy.getName());                // Output: Guest
+
+// The method of solving 2 problems above has a serious drawback - method is being provided with the original object, which could be passed somewhere else. That
+// could break the functionality of proxying.
+
+// Proxy and proxied object are distinct objects. If original object is used as a key of a collection - it couldn't be located by it's proxy.
+const allUsers = new Set();
+class User {
+    constructor(name) {
+        this.name = name;
+        allUsers.add(this);
+    }
+}
+const user5 = new User('John');
+console.log(allUsers.has(user5));                   // Output: true
+const user5Proxy = new Proxy(user5, {});
+console.log(allUsers.has(user5Proxy));              // Output: false
+
+// Proxy can't intercept the strict equality check '==='. Every method, using a strict equality check, will deffer the proxy and it's original object.

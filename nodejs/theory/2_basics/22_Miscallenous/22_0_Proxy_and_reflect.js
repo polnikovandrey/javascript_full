@@ -344,3 +344,24 @@ const user5Proxy = new Proxy(user5, {});
 console.log(allUsers.has(user5Proxy));              // Output: false
 
 // Proxy can't intercept the strict equality check '==='. Every method, using a strict equality check, will deffer the proxy and it's original object.
+
+// Revocable proxies.
+// Revocable proxy is a proxy, which could be unlinked from the original object using a 'revoke' method. It could be used to close an access to the object manually after some
+// stage of execution. It there are links on the original object only in a proxy, both proxy and original object are valid for garbage collection after revocation.
+let valuableData = {
+    data: 'Valuable data'
+};
+let {proxy: revocableProxy, revoke} = Proxy.revocable(valuableData, {});
+console.log(revocableProxy.data);               // Output: Valuable data
+revoke();
+// console.log(revocableProxy.data);            // TypeError: Cannot perform 'get' on a proxy that has been revoked
+// A WeakMap could be used to store a revoke function, mapped to the according proxy. A WeakMap allows a garbage collection of a revoke function if the proxy becomes unreachable.
+const revokes = new WeakMap();
+const original = {
+    data: 'Data'
+};
+const {proxy: proxy2, revoke: revoke2} = Proxy.revocable(original, {});
+revokes.set(proxy2, revoke2);
+console.log(proxy2.data);                       // Output: Data
+revokes.get(proxy2)();
+// console.log(proxy2.data);                    // TypeError: Cannot perform 'get' on a proxy that has been revoked

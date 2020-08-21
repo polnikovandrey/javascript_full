@@ -34,8 +34,8 @@ logNow('DEBUG')('A message');                           // Output: Fri Aug 21 20
 const debugNow = logNow('DEBUG');                       // 'debugNow' always logs with the given date value and 'DEBUG' importance.
 debugNow('A message');                                  // Output: Fri Aug 21 2020 21:15:59 GMT+0300 (GMT+03:00) DEBUG: A message
 
-// lodash's curry implementation could be replaced with a custom one.
-function curry(func) {
+// lodash's advanced curry implementation could be replaced with a custom one.
+function advancedCurry(func) {
     return function curried(...args) {
         if (args.length >= func.length) {
             return func.apply(this, args);
@@ -49,7 +49,7 @@ function curry(func) {
 function sumValues(a, b, c) {
     console.log(a + b + c);
 }
-const curriedSumValues = curry(sumValues);
+const curriedSumValues = advancedCurry(sumValues);
 curriedSumValues(1, 2, 3);                      // Output: 6
 curriedSumValues(1)(2, 3);                      // Output: 6
 curriedSumValues(1)(2)(3);                      // Output: 6

@@ -21,3 +21,37 @@ const _ = require('lodash');
 const lodashCurriedSum = _.curry(sum);
 console.log(lodashCurriedSum(1)(2));        // Output: 3
 console.log(lodashCurriedSum(1, 2));        // Output: 3
+
+// Currying is used to implement 'partially applied functions' (functions with default parameters).     // Частично примененная функция.
+function log(date, importance, message) {
+    console.log(`${date} ${importance}: ${message}`);
+}
+const curriedLog = _.curry(log);
+curriedLog(new Date(), 'DEBUG', 'A message');           // Output: Fri Aug 21 2020 21:15:59 GMT+0300 (GMT+03:00) DEBUG: A message           Works as a common function.
+curriedLog(new Date())('DEBUG')('A message');           // Output: Fri Aug 21 2020 21:15:59 GMT+0300 (GMT+03:00) DEBUG: A message           Works as a curried function.
+const logNow = curriedLog(new Date());                  // 'logNow' always logs with the given date value.
+logNow('DEBUG')('A message');                           // Output: Fri Aug 21 2020 21:15:59 GMT+0300 (GMT+03:00) DEBUG: A message
+const debugNow = logNow('DEBUG');                       // 'debugNow' always logs with the given date value and 'DEBUG' importance.
+debugNow('A message');                                  // Output: Fri Aug 21 2020 21:15:59 GMT+0300 (GMT+03:00) DEBUG: A message
+
+// lodash's curry implementation could be replaced with a custom one.
+function curry(func) {
+    return function curried(...args) {
+        if (args.length >= func.length) {
+            return func.apply(this, args);
+        } else {
+            return function(...args2) {
+                return curried.apply(this, args.concat(args2));
+            };
+        }
+    };
+}
+function sumValues(a, b, c) {
+    console.log(a + b + c);
+}
+const curriedSumValues = curry(sumValues);
+curriedSumValues(1, 2, 3);                      // Output: 6
+curriedSumValues(1)(2, 3);                      // Output: 6
+curriedSumValues(1)(2)(3);                      // Output: 6
+
+// Only functions with a fixed number of arguments could be curried. Function with 'rest parameters' operator couldn't be curried.

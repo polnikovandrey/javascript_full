@@ -123,29 +123,3 @@ console.log(aDate.toLocaleString('ru', { year: 'numeric', month: 'long' }));    
 // All those methods create the Intl object and use those methods under the hood.
 
 // IE10 doesn't support Intl - the polyfill-library https://github.com/andyearnshaw/Intl.js could be used.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -30,7 +30,7 @@ console.log(url4.username);     // Output: admin
 console.log(url4.password);     // Output: pass
 
 // To create a url with search parameters (?a=1&b=2...) - a URL.searchParams property could be used. It has a value of the URLSearchParams object,
-// which has convenient methods to manage search parameters, conforming search parameters encoding rules for non-latin characters:
+// which has convenient methods to manage search parameters, conforming search parameters encoding rules for non-latin characters (https://tools.ietf.org/html/rfc3986):
 // * append(name, value)
 // * delete(name)
 // * get(name)
@@ -49,4 +49,19 @@ for (let [name, value] of url5.searchParams) {
     console.log(`${name}=${value}`);        // Output: q=test me! /n tbs=qdr:y
 }
 
-// Encoding... !!!
+// To handle encoding with a string urls there is a set of built-in methods:
+// * encodeURI()
+// * decodeURI()
+// * encodeURIComponent()
+// * decodeURIComponent()
+// There is a reason why ...Component methods are needed - the rules for different components differ. E.g. :?=&# symbols are allowed in url, but denied in parameters.
+// So encodeURI() method encodes only symbols denied in url. And encodeURIComponent() additionally encodes #, $, &, +, ,, /, :, ;, =, ? and @ symbols.
+const url6 = encodeURI('http://site.com/привет');
+console.log(url6);          // Output: http://site.com/%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82
+const musicParam = encodeURIComponent('Rock&Roll');         // Note - encodeURI() doesn't handle & symbol.
+console.log(musicParam);    // Output: Rock%26Roll
+const url7 = `https://google.com/search?q=${musicParam}`;
+console.log(url7);          // Output: https://google.com/search?q=Rock%26Roll
+
+// There is a difference between URL/URLSearchParams and encode*() encoding. URL/URLSearchParams conform the newly https://tools.ietf.org/html/rfc3986, while
+// encode*() supports older https://www.ietf.org/rfc/rfc2396.txt. There are some differences, e.g. the older one doesn't support IPv6 addresses.

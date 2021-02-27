@@ -77,7 +77,7 @@ eventSource.close();
 // EventSource generates 3 types of events:
 // * message
 // * open
-// * error
+// * error  (the eventSource.readyState property could be used to know if the reconnection process is active)
 // A server could send another custom-defined messages. To make so it must prepend the 'event: ...' string before the 'data:...' line in a message:
 /*
     event: join

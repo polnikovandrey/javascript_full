@@ -111,10 +111,203 @@ openRequest.onsuccess = function(event) {
         console.log('Transaction was finished.');
     };
 
-    transaction.abort();                                // To cancel the transaction manually.
+    // A transaction could finish unsuccessfully, there is a number of possible reasons: incorrect request, db size limit exceeded, ... By default a transaction id being
+    // rolled back in that case, but the rollback could be prevented and there could be an attempt to continue the transaction.
+    transaction.onerror = function(event) {
+        if (request.error.name === 'ConstraintError') {
+            console.log(`The book with id ${book.id} already exists.`);
+            event.preventDefault();                 // Cancelling the transaction rollback.
+            event.stopPropagation();                // As soon as the error is handled - the propagation of error to the database object must be stopped.
+            book.id = 'newId';
+            const request = books.add(book);        // Trying to write a book with another id.
+        } else {
+            console.log('Unknown error, transaction rollback.');
+            // This situation could be handled in the transaction.onabort function.
+        }
+    };
+
+    // To cancel the transaction manually.
+    transaction.abort();
     transaction.onabort = function(event) {             // The 'abort' event will be fired after the .abort() method call.
         console.log('Transaction was aborted.');
     };
+
+    // There is no need to handle error/success event on each request. These events bubble: request -> transaction -> db. So every error/success event could be listened by the db:
+    db.onsuccess = function(event) { };
+    db.onError = function(event) {
+        const aRequest = event.target;
+        console.log(request.error);
+    };
 };
+
+
+// There are 2 types of queries:
+// * search by key or a key range (book.id)
+// * search by field of an object (book.price)
+
+// There is a number of IDBKeyRange methods to create ranges:
+// * IDBKeyRange.lowerBound(lower, [open])          means [key] > [lower] if [open=false] and [key] >= [lower] if [open=true]
+// * IDBKeyRange.upperBound(upper, [open])
+// * IDBKeyRange.bound(lower, upper, [lowerOpen], [upperOpen])
+// * IDBKeyRange.only(key)                          a single key range, rarely used
+
+// All query methods accept a query argument, which could be a particular value or an IDBKeyRange object:
+// * store.get(query)                       find first
+// * store.getAll([query], [count])
+// * store.getKey(query)
+// * store.getAllKeys([query], [count])
+// * store.count(query)
+// Note: a store is always sorted by the key, so all query methods return results sorted by keys.
+const booksRequest = indexedDB.open('books');
+booksRequest.onsuccess = function(event) {
+    const db = openRequest.result;
+    const transaction = db.transaction('books');
+    const books = transaction.objectStore('books');
+    books.get('js');                                                    // id === 'js'
+    books.getAll(IDBKeyRange.bound('css', 'html'));         // 'css' < id < 'html'
+    books.getAll();
+    books.getAllKeys();
+};
+
+// To query a custom object field a special data structure 'index' must be created.
+// objectStore.createIndex(name, keyPath, [options]);
+// * name - the index name
+// * keyPath - the path of the field to index (which will be queried)
+// * options:
+//      - unique - if true the field value must be unique, the db will generate an error if the object with the same field value is added to the db.
+//      - multiEntry - have meaning only if the keyPath is an array of values. False (by default) - index treats all the keyPath array as a key. True - index will store
+//      the list of objects for every value of the keyPath array (every value becomes an index of the object store).
+// Indexes must be created only inside 'onupgradeneeded' event listener.
+const indexedRequest = indexedDB.open('books');
+indexedRequest.onupgradeneeded = function(event) {
+    const db = openRequest.result;
+    const books = db.createObjectStore('books', { keyPath: 'id' });
+    const index = books.createIndex('price_idx', 'price');
+};
+indexedRequest.onsuccess = function(event) {
+    const db = openRequest.result;
+    let transaction = db.transaction("books", 'readwrite');
+    let books = transaction.objectStore("books");
+    books.add({ id: 'html', price: 3 });
+    books.add({ id: 'css', price: 5 });
+    books.add({ id: 'js', price: 10 });
+    books.add({ id: 'nodejs', price: 10 });
+    // Now the 'price_idx' could be represented as:
+    // { 3: ['html'], 5: ['css'], 10: ['js', 'nodejs'] }
+    // So an index is like an object with properties of the indexed field values and an array of ids as a value of that property.
+    let priceIndex = books.index("price_idx");
+    const request = priceIndex.getAll(10);
+    request.onsuccess = function() {
+        if (request.result !== undefined) {
+            console.log(`Books: ${request.result}`);
+        } else {
+            console.log('There is no book with price 10');
+        }
+    };
+    const rangeRequest = priceIndex.getAll(IDBKeyRange.upperBound(5));
+
+    // To delete a book from the object store - a delete() method could be used.
+    books.delete('js');                             // By id
+
+    const toDeleteRequest = priceIndex.getKey(5);   // By query
+    toDeleteRequest.onsuccess = function() {
+        const idToDelete = request.result;
+        const deleteRequest = books.delete(idToDelete);
+    };
+
+    books.clear();                                      // Delete all books
+};
+
+
+// Cursors
+// Cursor is mean to get the results of the query one-by-on. If the data is too large - the common query methods could fail, here comes the cursor to the rescue.
+// As like as query methods, cursor also respect the order of the IndexedDB.
+// To create a values-cursor:
+// const request = store.openCursor(query, [direction]);
+// To create a keys-cursor:
+// const request = store.openKeyCursor(query, [direction]);
+// * query - a key or an IDBKeyRange
+// * direction - one of:
+//      - 'next' ascending order
+//      - 'prev' descending order
+//      - 'nextunique'/'prevunique' cursor returns only distinct values (only the first found per key)
+// The 'success' event is being generated for each result of a cursor.
+const cursorRequest = indexedDB.open('books');
+cursorRequest.onsuccess = function(event) {
+    const db = openRequest.result;
+    const transaction = db.transaction('books');
+    const books = transaction.objectStore('books');
+    const request = books.openCursor();
+    request.onsuccess = function() {
+        const cursor = request.result;
+        if (cursor) {
+            const key = cursor.key;     // id of the book found
+            const value = cursor.value; // the book object
+            cursor.continue();
+                // Cursor methods:
+                // cursor.advance(count) - cursor moves and skips [count] of positions
+                // cursor.continue([key]) - move the cursor to the next position (after the [key] position if the argument was provided)
+        } else {
+            // 'success' is fired even if there is no more result, request.result is undefined in that case.
+            console.log('No more books');
+        }
+    };
+
+    // A cursor could be created for the indexes also.
+    let priceIndex = books.index("price_idx");
+    const indexCursor = priceIndex.openCursor(IDBKeyRange.upperBound(5));
+    request.onsuccess = function() {
+        const cursor = request.result;
+        if (cursor) {
+            const indexKey = cursor.key;        // Note: the key property of the indexed cursor contains a key of the index.
+            const primaryKey = cursor.primaryKey;      // Note: to get the primary key the special property [primaryKey] could be used.
+            const value = cursor.value;
+            cursor.continue();
+        } else {
+            console.log('No more books');
+        }
+    };
+};
+
+
+// Sometimes it's appropriate to use events delegation alongside with 'success' and other IndexedDB events, because there could be too many request.onsuccess functions.
+// Another way to simplify the code is to promisify IndexedDB with a db wrapper, e.g. https://github.com/jakearchibald/idb.
+async function connect() {
+    const idb = require('idb');
+    const db = await idb.openDB('store', 1, db => {
+        if (db.oldVersion === 0) {
+            db.createObjectStore('books', { keyPath: 'id' });
+        }
+    });
+    const transaction = db.transaction('books', 'readwrite');
+    const books = transaction.objectStore('books');
+    try {
+        await books.add({ id: 'js', price: 100 });
+        await books.add({ id: 'java', price: 200 });
+        await transaction.complete;
+        console.log('Saved');
+    } catch(err) {
+        console.log('Error');
+        // If the error wasn't handled here - it bubbles up in the stack. If the error wasn't handled somewhere - that error becomes the 'unhandled promise rejection' event
+        // of the 'window' object. See the code below, which handles that kind of events.
+    }
+}
+window.addEventListener('unhandledrejection', event => {        // See the comment above.
+    const request = event.target;   // IndexedDb query object
+    const error = event.reason;     // Unhandled error object, same as request.error
+    // code to handle the error
+});
+
+// The 'inactive transaction' problem is actual for the async/await IndexedDB communication also. It there is an async task (await something, e.g. fetch())
+// inside the transaction code - the next transaction access will throw the 'inactive transaction' error. There are 2 methods to cope with that problem:
+// 1. to create a new transaction after the await of the async task
+// 2. to split the task by 2 parts - prepare the data needed (fetch); open a transaction and store the data.
+
+// Idb library wraps 'error'/'success' events with promises and returns them. Sometimes it's essential to get access to the original [request] object. It could be accessed
+// as a [promise.request] property:
+// const promise = books.add(...);
+// const request = promise.request;
+// const transaction = request.transaction;
+// const result = await promise;
 
 

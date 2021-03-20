@@ -146,3 +146,48 @@ const userWithReadonlyNameShort: UserWithReadonlyNameShort = new UserWithReadonl
 console.log(userWithReadonlyNameShort.name);        // Output: Tom
 // userWithReadonlyNameShort.name = 'John';         // The property is readonly - compiler error.
 
+
+
+// A class could be extended by another with the help of the 'extends' keyword.
+class Person {
+    constructor(private name: string) {
+    }
+    public logInfo(): void {
+        console.log(this.getInfo());
+    }
+    protected getInfo(): string {
+        return `Name: ${this.name}`;
+    }
+}
+class Employee extends Person {                                     // Extend option 1
+    constructor(name: string, private position: string) {
+        super(name);
+    }
+    protected getInfo(): string {                                   // Note method override
+        return super.getInfo() + `, position: ${this.position}`;    // Note super method call
+    }
+}
+const Employee1 = class extends Person {
+    constructor(name: string, private position: string) {
+        super(name);
+    }
+    protected getInfo(): string {                                   // Extend option 2
+        return super.getInfo() + `, position ${this.position}`;
+    }
+}
+new Employee('Tom', 'manager').logInfo();           // Output: Name: Tom, position: manager
+
+
+// A class could be abstract and contain abstract methods.
+abstract class Figure {
+    abstract getArea(): void;
+}
+class Rectangle extends Figure {
+    constructor(private width: number, private height: number) {
+        super();                                                    // Note: super() call is required.
+    }
+    getArea(): void {
+        console.log(`Area: ${this.width * this.height}`);
+    }
+}
+new Rectangle(2, 3).getArea();                          // Output: Area: 6

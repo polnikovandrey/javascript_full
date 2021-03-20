@@ -82,7 +82,7 @@ const longNameUser = {
             console.log(`The name ${name} is too short!`);
             return;
         }
-        this._name = name;
+        this.name = name;
     }
 };
 longNameUser.name = 'Vanessa';

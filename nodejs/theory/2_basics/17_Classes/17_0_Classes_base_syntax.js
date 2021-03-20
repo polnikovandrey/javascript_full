@@ -103,7 +103,7 @@ Object.defineProperties(HasComputedPropertiesNGettersSetters.prototype, {
             return this._name;
         },
         set(value) {
-            this._name = value;
+            this.name = value;
         }
     }
 });

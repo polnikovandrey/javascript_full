@@ -106,3 +106,43 @@ const shortUser = new ShorthandPropertiesUser('Tom', 10, false, 'Tommy');
 // console.log(`${shortUser.guest}`);           // protected - compiler error
 console.log(`${shortUser.nickName}`);           // Output: Tommy
 
+
+// The common practice is to support a private property with getters and setters.
+class UserWithGetterSetter {
+    private _name: string;
+    constructor(name: string) {
+        this._name = name;
+    }
+    public get name(): string {
+        console.log('Get');
+        return this._name;
+    }
+    public set name(name: string) {
+        console.log('Set');
+        this._name = name;
+    }
+}
+const userWithGetterSetter = new UserWithGetterSetter('');
+userWithGetterSetter.name = 'Tom';              // Output: Set
+console.log(userWithGetterSetter.name);         // Output: Get /n Tom
+
+// A property could be defined as readonly. That property could be defined with the constructor only.
+class UserWithReadonlyName {
+    readonly name: string;
+    constructor(name: string) {
+        this.name = name;
+    }
+}
+const userWithReadonlyName = new UserWithReadonlyName('Tom');
+console.log(userWithReadonlyName.name);         // Output: Tom
+// userWithReadonlyName.name = 'John';          // The property is readonly - compiler error.
+
+// A readonly property could be implicitly created with a readonly constructor argument definition.
+class UserWithReadonlyNameShort {
+    constructor(readonly name: string) {
+    }
+}
+const userWithReadonlyNameShort = new UserWithReadonlyNameShort('Tom');
+console.log(userWithReadonlyNameShort.name);        // Output: Tom
+// userWithReadonlyNameShort.name = 'John';         // The property is readonly - compiler error.
+

@@ -13,7 +13,7 @@ class User {
         return `id: ${this.id}, name: ${this.name}`;
     }
 }
-const user = new User(1, 'Tom');
+const user: User = new User(1, 'Tom');
 console.log(user.getInfo());                        // Output: id: 1, name: Tom
 
 
@@ -64,7 +64,7 @@ class PrivateUser {
         return new Date().getFullYear() - age;
     }
 }
-const userTom = new PrivateUser('Tom', 29);
+const userTom: PrivateUser = new PrivateUser('Tom', 29);
 userTom.displayName();                  // Output: Name: Tom
 userTom.displayYear();                  // Output: Year of birth: 1992
 // console.log(userTom._name);          // _name property is private, compile error
@@ -81,7 +81,7 @@ class ProtectedUser {
         console.log(`User name: ${this.name}`);
     }
 }
-const protectedUser = new ProtectedUser('Protected', 20);
+const protectedUser: ProtectedUser = new ProtectedUser('Protected', 20);
 // console.log(protectedUser.name);     // name is the protected property, compile error
 protectedUser.displayName();            // Output: User name: Protected
 class ExtendedProtectedUser extends ProtectedUser {
@@ -92,7 +92,7 @@ class ExtendedProtectedUser extends ProtectedUser {
         // console.log(`Extended user age: ${this.age}`);       // Note - parent private property [age] is not accessible.
     }
 }
-const extendedProtectedUser = new ExtendedProtectedUser('Extended', 30);
+const extendedProtectedUser: ExtendedProtectedUser = new ExtendedProtectedUser('Extended', 30);
 extendedProtectedUser.displayName();    // Output: Extended user name: Extended
 
 // There is a possibility to shorthand properties definition. Properties are being create under the hood if an access modifier is supplied in the constructor arguments.
@@ -100,7 +100,7 @@ class ShorthandPropertiesUser {
     constructor(private name: string, private age: number, protected guest: boolean, public nickName: string) {
     }
 }
-const shortUser = new ShorthandPropertiesUser('Tom', 10, false, 'Tommy');
+const shortUser: ShorthandPropertiesUser = new ShorthandPropertiesUser('Tom', 10, false, 'Tommy');
 // console.log(`${shortUser.name}`);            // private - compiler error
 // console.log(`${shortUser.age}`);             // private - compiler error
 // console.log(`${shortUser.guest}`);           // protected - compiler error
@@ -122,7 +122,7 @@ class UserWithGetterSetter {
         this._name = name;
     }
 }
-const userWithGetterSetter = new UserWithGetterSetter('');
+const userWithGetterSetter: UserWithGetterSetter = new UserWithGetterSetter('');
 userWithGetterSetter.name = 'Tom';              // Output: Set
 console.log(userWithGetterSetter.name);         // Output: Get /n Tom
 
@@ -133,7 +133,7 @@ class UserWithReadonlyName {
         this.name = name;
     }
 }
-const userWithReadonlyName = new UserWithReadonlyName('Tom');
+const userWithReadonlyName: UserWithReadonlyName = new UserWithReadonlyName('Tom');
 console.log(userWithReadonlyName.name);         // Output: Tom
 // userWithReadonlyName.name = 'John';          // The property is readonly - compiler error.
 
@@ -142,7 +142,7 @@ class UserWithReadonlyNameShort {
     constructor(readonly name: string) {
     }
 }
-const userWithReadonlyNameShort = new UserWithReadonlyNameShort('Tom');
+const userWithReadonlyNameShort: UserWithReadonlyNameShort = new UserWithReadonlyNameShort('Tom');
 console.log(userWithReadonlyNameShort.name);        // Output: Tom
 // userWithReadonlyNameShort.name = 'John';         // The property is readonly - compiler error.
 

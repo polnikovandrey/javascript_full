@@ -55,7 +55,7 @@ console.log((anyType as string).length);
 
 
 // TypeScript function declaration differs from javascript, it allows to declare a type of arguments and a type of a return value.
-function add(a, b) { return a + b; }                                                // Javascript function
+// function add(a, b) { return a + b; }                                             // Javascript function
 function addWithTypes(a: number, b: number): number { return a + b; }               // TypeScript function 1
 const addWithTypes1 = function(a: number, b: number): number { return a + b; }      // TypeScript function 2
 // Note the 'void' return type - function returns nothing. The 'void' is the default return type if there is no return type declaration.
@@ -83,3 +83,37 @@ function addFunction(a: String, b: String): string;                 // No declar
 function addFunction(a: any, b: any): any { return a + b; }         // 'Common' function must follow overriding functions.
 addFunction(1, 2);
 addFunction('a', 'b');
+
+
+// Each function has a type - a combination of parameter types and return type (like signature in java). A variable could be assigned a function type and could
+// be used to hold any function with the compliant type.
+function sum(x: number, y: number): number {
+    return x + y;
+}
+function subtract(x: number, y: number): number {
+    return x - y;
+}
+let functionType: (x: number, y: number) => number;         // Function type declaration.
+functionType = sum;
+console.log(functionType(2, 1));                    // Output: 3
+functionType = subtract;
+console.log(functionType(2, 1));                    // Output: 1
+
+// Function type could be used as a variable declaration, as like as a function argument (callback function).
+function mathOperation(x: number, y: number, operation: (x: number, y: number) => number) {
+    return operation(x, y);
+}
+console.log(mathOperation(2, 1, sum));              // Output: 3
+console.log(mathOperation(2, 1, subtract));         // Output: 1
+
+
+// Arrow functions.
+let arrowSum = (x: number, y: number) => x + y;
+console.log(arrowSum(2, 1));                                   // Output: 3
+// let arrowSumWoTypes = (x, y) => x + y;                           // Argument types could be omitted.       // ?Compile error?
+// console.log(arrowSumWoTypes(2, 1));                              // Output: 3
+// let arrowSingleArgument = x => x * x;                            // Round brackets could be omitted if there is a single arrow function argument w/o a type. // ?Compile error?
+let arrowWoArguments = () => console.log("No arguments");           // Empty round brackets should be used if an arrow function have no arguments.
+
+// Arrow function could be used as a parameter of a function which have a callback argument.
+console.log(mathOperation(2, 1, (x: number, y: number) => x + y));      // Output: 3

@@ -18,7 +18,7 @@ const anotherArray: Array<Boolean> = [ false, false, false ];
 const aTuple: [string, number] = [ 'Tom', 28 ];     // A tuple(cortage) is a set(array) of variables of predefined types.
 console.log(aTuple[1]);                 // Output: 28
 
-enum Season { Winter, Spring, Summer, Autumn};
+enum Season { Winter, Spring, Summer, Autumn}
 const anEnum: Season = Season.Summer;
 enum Color { Gray = 2, Green = 5 };                 // Overriding ordinals
 console.log(anEnum);                                // Output: 2

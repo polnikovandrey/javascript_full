@@ -191,3 +191,99 @@ class Rectangle extends Figure {
     }
 }
 new Rectangle(2, 3).getArea();                          // Output: Area: 6
+
+
+
+
+interface IUser {                                                   // Interface.
+    id: number;
+    name: string;
+    age?: number;                                                   // The optional 'age' property.
+    readonly password?: string;                                     // The readonly optional 'password' property (couldn't be modified after object construction).
+    getFullName(surname: string): string;
+}
+const employee: IUser = {                                           // Implementation  should implement all interface's properties and methods.
+    id: 1,
+    name: 'Tom',
+    password: 'zxc',
+    getFullName(surname: string): string {
+        return `${this.name} ${surname}`;
+    }
+}
+console.log(`${employee.id} : ${employee.name}`);                   // Output: 1 : Tom
+console.log(employee.getFullName('Bearden'));               // Output: Tom Bearden
+function getEmployeeInfo(employee: IUser): void {
+    console.log(`${employee.id} : ${employee.name}`);
+}
+function buildEmployee(userId: number, userName: string, userAge?: number): IUser {
+    return {
+        id: userId,
+        name: userName,
+        age: userAge,
+        getFullName(surname: string): string {
+            return `${this.name} ${surname}`;
+        }
+    };
+}
+const employee1 = buildEmployee(2, 'Alice', 40);
+getEmployeeInfo(employee1);                                         // Output: 2 : Alice
+
+class UserImplementation implements IUser {
+    constructor(public id: number, public name: string) {
+    }
+    getFullName(surname: string): string {
+        return `${this.name + surname}`;
+    }
+}
+// Class UserImplementation is of both the UserImplementation type and the IUser type.
+const userJohn1: IUser = new UserImplementation(3, 'John');
+const userJohn2: UserImplementation = new UserImplementation(4, 'John');
+
+interface ReadWriteUser extends IUser {                             // One interface extends another.
+    readWriteAccess: boolean;
+}
+
+// Interface of a function:
+interface FullNameBuilder {
+    (name: string, surname: string): string;
+}
+const simpleBuilder: FullNameBuilder = function(name: string, surname: string): string {        // Implementing function must match the interface declaration.
+    return `Mr. ${name} ${surname};`
+}
+
+
+// Array interfaces allow access an array value of a particular type by index of by string.
+interface StringArray {
+    [index: number]: string;
+}
+const phones: StringArray = ['IPhone', 'HTC', 'Huawei'];
+console.log(phones[1]);                                         // Output: HTC
+interface Dictionary {
+    [index: string]: string;
+}
+const colors: Dictionary = { };
+colors['red'] = '#ff0000';
+colors['green'] = '#00ff00';
+colors['blue'] = '#0000ff';
+console.log(colors['red']);                                     // Output: #ff0000
+
+
+// Hybrid interfaces combine object definition and function definition. They are usually used to create object-factories.
+interface PersonInfo {
+    (name: string, surname: string): void;
+    fullName: string;
+    password: string;
+    authenticate(): void;
+}
+function personBuilder(): PersonInfo {
+    const person = <PersonInfo>function(name: string, surname: string): void {
+        person.fullName = name + ' ' + surname;
+    }
+    person.authenticate = function() {
+        console.log(`${person.fullName} is logging with the password: ${person.password}`);
+    }
+    return person;
+}
+const tomPerson = personBuilder();
+tomPerson('Tom', 'Simpson');
+tomPerson.password = 'qwerty';

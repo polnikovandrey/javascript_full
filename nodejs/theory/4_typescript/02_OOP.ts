@@ -339,3 +339,60 @@ handleInterfaceC({ propertyC: 'c' });                      // Ok. Object literal
 console.log(objectDOfClassD instanceof ClassD);                     // Output: True
 console.log(objectDOfClassD instanceof ClassC);                     // Output: True
 
+
+
+// TypeScript supports generalization (like as parametrization in Java).
+
+// Function generalization.
+function generalizedFunction<T>(arg: T): T {
+    return arg;
+}
+const aString: string = generalizedFunction('a');
+const aNumber: number = generalizedFunction(1);
+
+// Array generalization.
+function createGeneralizedArray<T> (arg: T[]): Array<T> {
+    return new Array<T>();
+}
+const numberArray: Array<number> = createGeneralizedArray([1, 2, 3] );
+const aNumber1: number | undefined = numberArray.pop();
+
+// Generalized classes and interfaces.
+class GeneralizedUser<T> {
+    private id: T;
+    constructor(id: T) {
+        this.id = id;
+    }
+}
+const aGeneralizedUser = new GeneralizedUser<number>(1);
+let aGeneralizedUser1 = new GeneralizedUser<string>('');
+// aGeneralizedUser1 = new GeneralizedUser<number>(2);              // A variable's generalized type couldn't be changed once initialized.
+
+// Generalization could be more precise and limited to a class or interface hierarchy with the help of the 'extends' syntax.
+interface GeneralizedUserInterface<T> {
+    id: T;
+}
+class GeneralizedUserImplementation implements GeneralizedUserInterface<number> {
+    constructor(public id: number) {
+        this.id = id;
+    }
+}
+interface GeneralizedUserConsumer<T extends GeneralizedUserInterface<number>> {
+    consume(user: T): void;
+}
+
+const generalizedUserConsumer: GeneralizedUserConsumer<GeneralizedUserInterface<number>> = new class implements GeneralizedUserConsumer<GeneralizedUserInterface<number>> {
+    consume(user: GeneralizedUserInterface<number>): void {
+    }
+}
+generalizedUserConsumer.consume(new GeneralizedUserImplementation(1));
+
+
+// Generalization could be used to produce objects of a generalized type. A special statement should be used to note that a type has a constructor.
+class Product {
+    constructor() { }
+}
+function productFactory<T>(type: { new (): T }): T {                    // 'new (): T' ensures that T parameter is a type with a constructor.
+    return new type();
+}
+const product = productFactory(Product);

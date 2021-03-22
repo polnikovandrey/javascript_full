@@ -287,3 +287,55 @@ function personBuilder(): PersonInfo {
 const tomPerson = personBuilder();
 tomPerson('Tom', 'Simpson');
 tomPerson.password = 'qwerty';
+
+
+// Casting classes. An object could be cast to a class with the help of angle brackets '<Class>' or the 'as Class' syntax.
+class ClassA {
+    methodA(): void { }
+}
+class ClassB extends ClassA {
+    methodB(): void { }
+}
+const objectBOfClassA: ClassA = new ClassB();
+// objectBOfTypeA.methodB();                                        // Compile error
+const castObjectBToClassB: ClassB = <ClassB>objectBOfClassA;          // Cast to type ClassB with <Class> syntax.
+castObjectBToClassB.methodB();
+(<ClassB>objectBOfClassA).methodB();                                 // Another cast to type ClassB "on the fly" with <Class> syntax.
+const anotherCastObjectBToClassB = objectBOfClassA as ClassB;         // Cast to type ClassB with 'as Class' syntax.
+anotherCastObjectBToClassB.methodB();
+(objectBOfClassA as ClassB).methodB();                               // Another cast to type ClassB "on the fly" with 'as Class' syntax.
+
+
+// Casting interfaces. Same as classes, but there is a possibility to use objects, which do not implement interface directly (but have all of the interface properties).
+// Object literals should have exactly the same list of properties to be compatible to an interface.
+interface InterfaceC {
+    propertyC: string;
+}
+class ClassC {
+    propertyC: string;
+    constructor(propertyC: string) {
+        this.propertyC = propertyC;
+    }
+}
+class ClassD extends ClassC {
+    propertyD: string;
+    constructor(propertyC: string, propertyD: string) {
+        super(propertyC);
+        this.propertyD = propertyD;
+    }
+}
+function handleInterfaceC(interfaceC: InterfaceC) {
+}
+const objectCOfClassC = new ClassC('c');
+const objectDOfClassD = new ClassD('c', 'd');
+const objectDOfClassC = new ClassD('c', 'd');
+handleInterfaceC(objectCOfClassC);                                  // Ok
+handleInterfaceC(objectDOfClassD);                                  // Ok. Note - it's ok for a class to have additional property ('propertyD').
+handleInterfaceC(objectDOfClassC);                                  // Ok
+handleInterfaceC({ propertyC: 'c' });                      // Ok. Object literal is compatible with the InterfaceC interface.
+// handleInterfaceC({ propertyC: 'c', propertyD: 'd' });            // Compile error, object literal has unknown property 'propertyD'.
+
+// 'instanceof' operator could be used to check if the object belongs to a class.
+console.log(objectDOfClassD instanceof ClassD);                     // Output: True
+console.log(objectDOfClassD instanceof ClassC);                     // Output: True
+

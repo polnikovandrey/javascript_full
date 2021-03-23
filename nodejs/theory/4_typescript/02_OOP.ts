@@ -427,3 +427,6 @@ console.log(theMixin.propertyOne);              // Output: 1
 console.log(theMixin.propertyTwo);              // Output: 2
 theMixin.methodOne();                           // Output: One
 theMixin.methodTwo();                           // Output: Two
+// Mixins disadvantages:
+// * works only for own properties and methods of the inherited class. E.g. if the ClassOne extends ClassZero - ClassZero's properties and methods will not be inherited.
+// * a mixin inherits only one of the methods with a common name in source classes (the last one, see applyMixins() method).

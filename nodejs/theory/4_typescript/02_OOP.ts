@@ -396,3 +396,34 @@ function productFactory<T>(type: { new (): T }): T {                    // 'new 
     return new type();
 }
 const product = productFactory(Product);
+
+
+
+// Mixins - a kind of multiple inheritance emulation. It allows to inherit a number of properties and methods of multiple classes.
+class ClassOne {
+    propertyOne: number = 1;
+    methodOne(): void { console.log('One'); }
+}
+class ClassTwo {
+    propertyTwo: number = 2;
+    methodTwo(): void { console.log('Two'); }
+}
+class AMixin implements ClassOne, ClassTwo {                        // Note: implements multiple classes.
+    propertyOne: number = 1;                                        // Note: all properties should be declared.
+    propertyTwo: number = 2;
+    methodOne(): void { };                                          // Note: all methods should be declared with empty body.
+    methodTwo(): void { };
+}
+function applyMixins(derivedCtor: any, baseCtors: any[]): void {    // Note: method copies base classes methods to the target class prototype.
+    baseCtors.forEach(baseCtor => {
+        Object
+            .getOwnPropertyNames(baseCtor.prototype)
+            .forEach(name => derivedCtor.prototype[name] = baseCtor.prototype[name]);
+    });
+}
+applyMixins(AMixin, [ ClassOne, ClassTwo ]);
+const theMixin: AMixin = new AMixin();
+console.log(theMixin.propertyOne);              // Output: 1
+console.log(theMixin.propertyTwo);              // Output: 2
+theMixin.methodOne();                           // Output: One
+theMixin.methodTwo();                           // Output: Two

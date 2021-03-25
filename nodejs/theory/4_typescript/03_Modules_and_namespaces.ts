@@ -19,7 +19,7 @@ import personnelData = Data.Personnel;          // Namespace alias.
 personnelData.someFunction();
 
 
-/// <reference path="./03_Service.ts"/>             // Legacy directive to use another .ts file. Compiler should be supported the -out parameter with both files.
+/// <reference path="./03_Namespace.ts"/>             // Legacy directive to use another .ts file. Compiler should be supported the -out parameter with both files.
 // Service.perform();                               // Doesn't work without a compiler parameter. Modules should be used to import something from another file.
 
 
